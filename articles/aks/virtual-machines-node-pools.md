@@ -245,7 +245,7 @@ The following example adds VIrtual Machines nodepool *myvmpool* to a cluster nam
 
 The following example updates settings for VIrtual Machines nodepool *myvmpool* in cluster named *myAKSCluster* using virtual machine size of "Standard_D4s_v3":
 
-    ```azurecli-interactive
+```azurecli-interactive
     az aks nodepool update \
         --resource-group myResourceGroup \
         --cluster-name myAKSCluster \
@@ -254,7 +254,7 @@ The following example updates settings for VIrtual Machines nodepool *myvmpool* 
         --node-vm-size "Standard_D4s_v3" \
         --min-count 2 \
         --max-count 5
-    ```
+```
 
 ### Update a Virtual Machines node pool from manual mode to cluster autoscaler enabled
 
@@ -263,17 +263,17 @@ The following example updates settings for VIrtual Machines nodepool *myvmpool* 
 
 If your Virtual Machine node pool has multiple manual scale profiles, you must remove all manual scale profiles except for the selected size you want for autoscaling purposes. See the following example which deletes the manual scale profile in node pool "myvmpool" for VM size `Standard_D8s_v3`:
 
-    ```azurecli-interactive
+```azurecli-interactive
     az aks nodepool manual-scale delete \
         --resource-group myResourceGroup \
         --cluster-name myAKSCluster \
         --name myvmpool \
         --current-vm-sizes "Standard_D8s_v3"
-     ```
+```
 
 The following example updates VIrtual Machines nodepool *myvmpool* in the cluster named *myAKSCluster* from `Manual` mode to `Auto` mode:
 
-    ```azurecli-interactive
+```azurecli-interactive
     az aks nodepool update \
         --resource-group myResourceGroup \
         --cluster-name myAKSCluster \
@@ -281,7 +281,7 @@ The following example updates VIrtual Machines nodepool *myvmpool* in the cluste
         --enable-cluster-autoscaler \
         --min-count 2 \
         --max-count 5
-    ```
+```
 
  ### Disable cluster autoscaler in Virtual Machines node pool
 
@@ -289,13 +289,13 @@ You can disable [cluster autoscaler][cluster-autoscaler], or change the cluster 
 
 The following example updates VIrtual Machines nodepool *myvmpool* in the cluster named *myAKSCluster* from `Manual` mode to `Auto` mode:
 
-     ```azurecli-interactive
+```azurecli-interactive
     az aks nodepool update \
         --resource-group myResourceGroup \
         --cluster-name myAKSCluster \
         --name myvmpool \
         --disable-cluster-autoscaler \
-    ```
+```
 
 ## Next steps
 
