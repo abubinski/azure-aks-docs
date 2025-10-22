@@ -202,11 +202,25 @@ Virtual Machine node pools are available in Windows enabled clusters. The follow
 Virtual Machines node pools support [cluster autoscaler][cluster-autoscaler]. This can be enabled using the flag `--enable-cluster-autoscaler` during cluster creation, while adding a new node pool, or in updating an existing manual node pool.
 
 When using cluster autoscaler with Virtual Machine node pools, 
+- Scale up: autoscaler will respond to pending pod pressure, and scale up a the node count of a node pool with the same type of single SKU in that node pool. 
+- Scale down: a specific node will be chosen by autoscaler based on the utilization of node. you can configure `scale-down-utilization-threshold`to adjust when cluster autoscaling triggers a scaling action. See [cluster autoscaler documentation][cluster-autoscaler] for more information on configuring autoscaling. 
 
 ### Requirements
-- To enable cluster autoscaler with Virtual Machine node pools, the node pool must only use one VM size.
-- 
+- To enable cluster autoscaler with Virtual Machine node pools, the node pool must only use one VM size. All other manual scale profiles must be deleted before enabling cluster autoscaler.
 
+### Install the aks-preview extension
+
+[!INCLUDE [preview features callout](~/reusable-content/ce-skilling/azure/includes/aks/includes/preview/preview-callout.md)]
+
+- Install or update the `aks-preview` Azure CLI extension by using the [`az extension add`](/cli/azure/extension#az-extension-add) or [`az extension update`](/cli/azure/extension#az-extension-update) command:
+
+```azurecli-interactive
+    # Install the aks-preview extension
+    az extension add --name aks-preview
+    
+    # Update the aks-preview extension
+    az extension update --name aks-preview
+```
 
 ### Create an AKS cluster with Virtual Machines node pools and cluster-autoscaler enabled
 - Create an AKS cluster with Virtual Machines node pools using the [`az aks create`][az aks create] command with the `--vm-set-type` flag set to `"VirtualMachines"` and with the flag `--enable-cluster-autoscaler`.
