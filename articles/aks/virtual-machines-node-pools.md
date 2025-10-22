@@ -50,7 +50,7 @@ The following table highlights how Virtual Machines node pools compare with stan
 
 #### Which compute scaling experience should I choose on AKS? 
 Depending on your workload needs, there are multiple compute scaling experiences to consider. See the use cases for each:
-- [Node auto provisioning](node-autoprovisioning.md): best for multi SKU autoscaling
+- [Node auto provisioning](node-autoprovision.md): best for multi SKU autoscaling
 = Virtual Machine node pools: best for multi-SKU manual scaling, and supports single SKU autoscaling. 
 - [Virtual Machine scale sets][VMSS orchestrate]: supports single SKU manual scaling and single SKU autoscaling. 
 
