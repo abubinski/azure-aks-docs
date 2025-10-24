@@ -304,11 +304,11 @@ You can disable [cluster autoscaler][cluster-autoscaler], or change the cluster 
 The following example updates VIrtual Machines node pool *myvmpool* in the cluster named *myAKSCluster* from `Manual` mode to `Auto` mode:
 
 ```azurecli-interactive
-    az aks nodepool update \
-        --resource-group myResourceGroup \
-        --cluster-name myAKSCluster \
-        --name myvmpool \
-        --disable-cluster-autoscaler \
+az aks nodepool update \
+    --resource-group myResourceGroup \
+    --cluster-name myAKSCluster \
+    --name myvmpool \
+    --disable-cluster-autoscaler
 ```
 
 ## Next steps
