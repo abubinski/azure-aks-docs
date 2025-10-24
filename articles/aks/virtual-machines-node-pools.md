@@ -260,14 +260,14 @@ az aks nodepool add \
 The following example updates settings for Virtual Machines node pool *myvmpool* in cluster named *myAKSCluster* using virtual machine size of "Standard_D4s_v3":
 
 ```azurecli-interactive
-    az aks nodepool update \
-        --resource-group myResourceGroup \
-        --cluster-name myAKSCluster \
-        --name myvmpool \
-        --update-cluster-autoscaler \
-        --node-vm-size "Standard_D4s_v3" \
-        --min-count 2 \
-        --max-count 5
+az aks nodepool update \
+    --resource-group myResourceGroup \
+    --cluster-name myAKSCluster \
+    --name myvmpool \
+    --update-cluster-autoscaler \
+    --node-vm-size "Standard_D4s_v3" \
+    --min-count 2 \
+    --max-count 5
 ```
 
 ### Update a Virtual Machines node pool from manual mode to cluster autoscaler enabled
