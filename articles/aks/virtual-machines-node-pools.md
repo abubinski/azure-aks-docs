@@ -288,13 +288,13 @@ az aks nodepool manual-scale delete \
 The following example updates Virtual Machines node pool *myvmpool* in the cluster named *myAKSCluster* from `Manual` mode to `Auto` mode:
 
 ```azurecli-interactive
-    az aks nodepool update \
-        --resource-group myResourceGroup \
-        --cluster-name myAKSCluster \
-        --name myvmpool \
-        --enable-cluster-autoscaler \
-        --min-count 2 \
-        --max-count 5
+az aks nodepool update \
+    --resource-group myResourceGroup \
+    --cluster-name myAKSCluster \
+    --name myvmpool \
+    --enable-cluster-autoscaler \
+    --min-count 2 \
+    --max-count 5
 ```
 
  ### Disable cluster autoscaler in Virtual Machines node pool
