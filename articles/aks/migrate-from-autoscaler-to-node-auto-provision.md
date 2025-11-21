@@ -13,9 +13,9 @@ author: wdarko1
 
 # Migrate from Cluster Autoscaler to Node auto provisioning
 
-This document provides instructions to migrate your existing Azure Kubernetes Service (AKS) cluster from using [cluster autoscaler][cluster-autoscaler] to [node auto provisioning][nap-main-doc]. 
+This document provides instructions to migrate your existing Azure Kubernetes Service (AKS) cluster from using [cluster autoscaler][cluster-autoscaler] to [node auto provisioning][nap-main-doc].
 
-Node auto provisioning (NAP) uses pending pod resource requirements to decide the optimal virtual machine configuration to run those workloads in the most efficient and cost-effective manner.
+Node auto provisioning (NAP) uses pending pod resource requirements to decide the optimal virtual machine (VM) configuration to run those workloads in the most efficient and cost-effective manner.
 
 Node auto provisioning is based on the open source [Karpenter](https://karpenter.sh) project, and the [AKS Karpenter provider][aks-karpenter-provider], which is also open source. Node auto provisioning automatically deploys, configures, and manages Karpenter on your AKS clusters.
 
@@ -23,7 +23,7 @@ Node auto provisioning is based on the open source [Karpenter](https://karpenter
 
 ### Why migrate from cluster autoscaler to Node auto provisioning
 
-Node auto provisioning offers a large range of improved experiences compared to Cluster autoscaler. NAP offers more intelligent bin-packing of compute, node life cycle management, and minimizes operation overhead. 
+Node auto provisioning offers a large range of improved experiences compared to Cluster autoscaler (CAS). NAP offers more intelligent bin-packing of compute, node life cycle management, and minimizes operation overhead. 
 
 | **Reason to Migrate**           | **Cluster Autoscaler (CAS)**                              | **Node Auto Provisioning (NAP)**                                   |
 |---------------------------------|-----------------------------------------------------------|--------------------------------------------------------------------|
@@ -43,7 +43,7 @@ The following table maps Cluster Autoscaler profile settings to Node Auto Provis
 | `scale-down-unready-time` | Time an unready node must be unneeded before eligible for scale down (default: 20m) | `terminationGracePeriod` | Grace period for pod termination before node removal | **CLI:**<br>`az aks update --cluster-autoscaler-profile scale-down-unready-time=20m`<br>**YAML:**<br>`disruption:`<br>`  terminationGracePeriod: 20m` |
 | `scale-down-utilization-threshold` | Node utilization threshold for scale down (default: 0.5) | `consolidationPolicy` | Policy for consolidation: `WhenEmpty` or `WhenEmptyOrUnderUtilized` | **CLI:**<br>`az aks update --cluster-autoscaler-profile scale-down-utilization-threshold=0.5`<br>**YAML:**<br>`disruption:`<br>`  consolidationPolicy: WhenEmptyOrUnderUtilized` |
 | `max-graceful-termination-sec` | Max seconds to wait for pod termination during scale down (default: 600s) | `terminationGracePeriod` | Explicitly sets termination grace period for NAP nodes | **CLI:**<br>`az aks update --cluster-autoscaler-profile max-graceful-termination-sec=600`<br>**YAML:**<br>`disruption:`<br>`  terminationGracePeriod: 600s` |
-| `scan-interval` | How often autoscaler reevaluates cluster (default: 10s) | N/A | NAP does not use periodic scans; decisions are event-driven | **CLI:**<br>`az aks update --cluster-autoscaler-profile scan-interval=10s`<br>**YAML:**<br>`# Not applicable in NAP` |
+| `scan-interval` | How often autoscaler reevaluates cluster (default: 10s) | N/A | NAP doesn't use periodic scans; decisions are event-driven | **CLI:**<br>`az aks update --cluster-autoscaler-profile scan-interval=10s`<br>**YAML:**<br>`# Not applicable in NAP` |
 | `max-empty-bulk-delete` | Max empty nodes deleted at once (default: 10) | `budgets` | Rate limits voluntary disruptions (percentage or absolute nodes) | **CLI:**<br>`az aks update --cluster-autoscaler-profile max-empty-bulk-delete=10`<br>**YAML:**<br>`disruption:`<br>`  budgets:`<br>`    nodes: 10` |
 | `skip-nodes-with-local-storage` | Prevents deleting nodes with local storage | Annotation: `karpenter.sh/do-not-disrupt` | Blocks disruption for specific nodes or pods | **CLI:**<br>`az aks update --cluster-autoscaler-profile skip-nodes-with-local-storage=true`<br>**YAML:**<br>`metadata:`<br>`  annotations:`<br>`    karpenter.sh/do-not-disrupt: "true"` |
 | `skip-nodes-with-system-pods` | Prevents deleting nodes with system pods | Annotation: `karpenter.sh/do-not-disrupt` | Same behavior for NAP | **CLI:**<br>`az aks update --cluster-autoscaler-profile skip-nodes-with-system-pods=true`<br>**YAML:**<br>`metadata:`<br>`  annotations:`<br>`    karpenter.sh/do-not-disrupt: "true"` |
@@ -54,7 +54,7 @@ The following table maps Cluster Autoscaler profile settings to Node Auto Provis
 
 
 >[!NOTE]
-> Unlike cluster autoscaler, NAP does not use Azure CLI commands to manage node behavior, so all decision making for NAP-managed nodes is determiend by the CRDs.
+> Unlike cluster autoscaler, NAP doesn't use Azure CLI commands to manage node behavior, so all decision making for NAP-managed nodes is determined by the CRDs.
 > For more on configuring your cluster specifications for NAP, visit our [NodePool documentation](./node-auto-provisioning-node-pools.md) and [AKSNodeClass documentation](./node-auto-provisioning-aksnodeclass.md).
 
 ## Before you begin
@@ -67,7 +67,7 @@ The following table maps Cluster Autoscaler profile settings to Node Auto Provis
 ### Limitations
 
 - You can't enable node autoprovisioning in a cluster where node pools have cluster autoscaler enabled
-- NAP currently does not support
+- NAP currently doesn't support
    - Windows node pools
    - IPv6 clusters
    - Service Principals
@@ -77,11 +77,11 @@ The following table maps Cluster Autoscaler profile settings to Node Auto Provis
 
 ### Pre-migration checklist
 
-- Confirm cluster eligibility for node auto provisioning. For more on NAP requirements visit our [Overview of NAP documentation](/azure/aks/node-auto-provisioning?tabs=azure-cli#prerequisites)
+- Confirm cluster eligibility for node auto provisioning. For more on NAP requirements, visit our [Overview of NAP documentation](/azure/aks/node-auto-provisioning?tabs=azure-cli#prerequisites)
 - Right-size workloads for consolidation
-  - Set proper [resource requests/limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container), replicas, and [pod disruption budgets (PDBs)](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget) to allow for a gradual migration. This migration method will require properly set PDBs to ensure well-managed disruption of your workloads. 
+  - Set proper [resource requests/limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container), replicas, and [pod disruption budgets (PDBs)](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget) to allow for a gradual migration. This migration method requires properly set PDBs to ensure well-managed disruption of your workloads. 
 - Verify your system node pool is active
-  - AKS requires a system node pool for system components (such as CoreDNS, Karpenter, etc.), when NAP is enabled, it will be responsible for autoscaling the system pool. 
+  - AKS requires a system node pool for system components (such as CoreDNS, Karpenter, etc.). When NAP is enabled, AKS is responsible for autoscaling the system pool. 
 
 ### Disable cluster autoscaler safely
 
@@ -91,7 +91,7 @@ If cluster autoscaler is enabled cluster-wide, disable it at the cluster level u
 az aks update --resource-group myResourceGroup --name myAKSCluster --disable-cluster-autoscaler
 ```
 
-If cluster autoscaler is only enabled on select node pools, you also have the option to disable cluster autoscaler for specific node pools using the `--disable-cluster-autoscaler` flag.
+If cluster autoscaler is only enabled on select node pools, you can disable cluster autoscaler for specific node pools using the `--disable-cluster-autoscaler` flag.
 
 ```azurecli-interactive
 # Disable CAS on a specific pool
@@ -172,7 +172,7 @@ spec:
 ```
 
 > [!IMPORTANT]
-> If your workloads depend on custom subnets or network policies, configure these in AKSNodeClass **before migrating workloads** to avoid scheduling failures. Visit our [AKSNodeClass documentation](./node-auto-provisioning-aksnodeclass.md) for details.
+> If your workloads depend on custom subnets or network policies, configure custom subnets or network policies in the AKSNodeClass **before migrating workloads** to avoid scheduling failures. Visit our [AKSNodeClass documentation](./node-auto-provisioning-aksnodeclass.md) for details.
 
 
 You can now deploy the custom resources to your cluster with the following `kubectl` command:
@@ -298,7 +298,7 @@ spec:
 ## Migrate workloads from fixed pools to node auto provisioning managed nodes
 
 >[!NOTE]
-> Consider setting node affinity to ensure that your workloads can tolerate NAP, and will be scheduled to the NAP-managed nodes when desired.
+> Consider setting node affinity to ensure that your workloads can tolerate NAP and are scheduled to the NAP-managed nodes when desired.
 
 Now scale down user pools gradually (keep the system pool):
 
@@ -311,7 +311,7 @@ az aks nodepool scale \
   --node-count <LOWER_DESIRED>
 ```
 
-As pods evict, node auto provisioning provisions replacement nodes per your NodePool and AKSNodeClass rules. If a user pool must go to zero, remember you can only do that on user pools (not system pool), and with cluster autoscaler disabled - which has been disabled in an earlier step.
+As pods evict, node auto provisioning provisions replacement nodes per your NodePool and AKSNodeClass rules. If a user pool must go to zero, remember you can only do that on user pools (not system pool), and with cluster autoscaler disabled - which is already disabled in an earlier step.
 
 >[!NOTE]
 > We recommend a gradual scale down in waves, and watch replicas/PDBs to avoid dips in availability.
@@ -347,14 +347,14 @@ Alternatively you can view the NodeClaims that represent the nodes being created
 kubectl get nodeclaims
 ```
 
-You should see a list of nodes being created by NAP. This confirms that NAP is provisioning nodes in response to pending pod pressure.
+You should see a list of nodes NAP is provisioning. This confirms that NAP is provisioning nodes in response to pending pod pressure.
 
 
 
 ### Clean up old autoscaling 
 
-- If you are using managed AKS cluster autoscaler only, you have already disabled cluster autoscaler with the above steps. 
-- If you are using self-hosted cluster autoscaler installed in kube-system, scale the cluster autoscaler pods to zero and remove.
+- If you're using managed AKS cluster autoscaler only, cluster autoscaler is already disabled with the above steps. 
+- If you're using self-hosted cluster autoscaler installed in kube-system, scale the cluster autoscaler pods to zero and remove.
 
 ```
 kubectl -n kube-system scale deploy/cluster-autoscaler --replicas=0
@@ -363,12 +363,12 @@ kubectl -n kube-system delete deploy/cluster-autoscaler
 
 ## Fine tune node auto provisioning post-migration
 
-After you have completed your migration there are more capabilities to fine tune your cluster.
+After you have completed your migration, there are more capabilities to fine tune your cluster.
 
 - **Manage disruption behavior** - Tune disruption `consolidationPolicy` and `consolidateAfter` windows to balance cost vs. virtual machine churn. To learn more, visit our [NAP Disruption documentation][nap-disruption-doc]
-- **Multiple NodePools** - Split by workload class (e.g., Spot vs On-Demand, GPU vs CPU) and use requirements, weights, and taints to control placement. To learn more, visit our [NAP NodePool documentation][nap-nodepool-doc]
-- **Networking** - For more information of managing networking experiences like custom virtual networks, visit our [NAP netowrking documentation][nap-networking-doc]
-- **Observability** Stream Karpenter events and expose NAP control-plane metrics via Azure Monitor managed Prometheus. For more visit our [NAP public documentation][nap-observability]
+- **Multiple NodePools** - Split by workload class (for example, Spot vs On-Demand, GPU vs CPU) and use requirements, weights, and taints to control placement. To learn more, visit our [NAP NodePool documentation][nap-nodepool-doc]
+- **Networking** - For more information of managing networking experiences like custom virtual networks, visit our [NAP networking documentation][nap-networking-doc]
+- **Observability** - Stream Karpenter events and expose NAP control-plane metrics via Azure Monitor managed Prometheus. For more visit our [NAP public documentation][nap-observability]
 
 
 ## Mapping Node Auto Provisioning vs. Cluster Autoscaler disruption logic
@@ -410,7 +410,7 @@ Node auto provisioning can only be disabled when:
    
    This action starts the process of migrating the workloads on the node autoprovisioning-managed nodes to non-NAP nodes, honoring Pod Disruption Budgets (PDBs) and disruption limits. Pods migrate to non-NAP nodes if they can fit. If there isn't enough fixed-size capacity, some node autoprovisioning-managed nodes remain.
 
-4. Scale up existing fixed-size ManagedCluster noode pools, or create new fixed-size node pools, to take the load from the node auto provisioning-managed nodes.
+4. Scale up existing fixed-size ManagedCluster node pools, or create new fixed-size node pools, to take the load from the node auto provisioning-managed nodes.
    As these nodes are added to the cluster the node auto provisioning-managed nodes are drained, and work is migrated to the fixed-scale nodes.
 
 5. Confirm that all node auto provisioning-managed nodes are deleted, using `kubectl get nodes -l karpenter.sh/nodepool`. If node autoprovisioning-managed nodes still exist, the cluster likely lacks fixed-scale capacity. Add more nodes so the remaining workloads can be migrated.
