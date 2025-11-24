@@ -546,6 +546,8 @@
                 href: app-routing-dns-ssl.md
               - name: Internal NGINX controller and private DNS zone
                 href: create-nginx-ingress-private-controller.md
+              - name: Kubernetes Gateway API with application routing
+                href: app-routing-gateway-api.md
               - name: Monitor using Prometheus and Grafana
                 href: app-routing-nginx-prometheus.md
               - name: Migrate from HTTP application routing to the application routing add-on

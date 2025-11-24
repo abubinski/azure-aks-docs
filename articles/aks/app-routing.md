@@ -19,6 +19,8 @@ One way to route Hypertext Transfer Protocol (HTTP) and secure (HTTPS) traffic t
 
 This article shows you how to deploy and configure a basic Ingress controller in your AKS cluster.
 
+> [!NOTE] Due to the [retirement of the Ingress NGINX][aks-nginx-retirement] project, it is highly recommended to migrate to the [application routing Gateway API implementation][app-routing-gateway-api]. Microsoft will provide official support for Application Routing add-on Ingress NGINX resources through November 2026 and only for critical security patches during this period.
+
 ## Application routing add-on with NGINX features
 
 The application routing add-on with NGINX delivers the following:
@@ -189,6 +191,8 @@ az aks approuting disable --name <ClusterName> --resource-group <ResourceGroupNa
 
 * Learn about monitoring the ingress-nginx controller metrics included with the application routing add-on with [with Prometheus in Grafana][prometheus-in-grafana] (preview) as part of analyzing the performance and usage of your application.
 
+* Enable the [application routing Gateway API implementation][app-routing-gateway-api] to manage ingress traffic with the Kubernetes Gateway API.
+
 <!-- LINKS - internal -->
 [azure-dns-overview]: /azure/dns/dns-overview
 [az-aks-approuting-enable]: /cli/azure/aks/approuting#az-aks-approuting-enable
@@ -203,6 +207,7 @@ az aks approuting disable --name <ClusterName> --resource-group <ResourceGroupNa
 [prometheus-in-grafana]: app-routing-nginx-prometheus.md
 [create-nginx-private-controller]: create-nginx-ingress-private-controller.md
 [managed-identity]: use-managed-identity.md
+[app-routing-gateway-api]: app-routing-gateway-api.md
 
 <!-- LINKS - external -->
 [kubernetes-ingress-object-overview]: https://kubernetes.io/docs/concepts/services-networking/ingress/
@@ -212,3 +217,4 @@ az aks approuting disable --name <ClusterName> --resource-group <ResourceGroupNa
 [kubectl]: https://kubernetes.io/docs/reference/kubectl/
 [kubectl-apply]: https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#apply
 [ingress-backend]: https://release-v1-2.docs.openservicemesh.io/docs/guides/traffic_management/ingress/#ingressbackend-api
+[aks-nginx-retirement]: https://blog.aks.azure.com/2025/11/13/ingress-nginx-update
