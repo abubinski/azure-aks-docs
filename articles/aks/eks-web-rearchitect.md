@@ -221,7 +221,7 @@ Other contributors:
 [azure-cr]: /azure/container-registry/container-registry-intro
 [azure-lb]: /azure/load-balancer/load-balancer-overview
 [azure-dns]: /azure/dns/dns-overview
-[azure-redis]: /azure/azure-cache-for-redis/cache-overview
+[azure-redis]: /azure/redis/overview
 [azure-postgresql]: /azure/postgresql/flexible-server/service-overview
 [agic]: /azure/application-gateway/ingress-controller-overview
 [aws-to-azure]: /azure/architecture/aws-professional/services
