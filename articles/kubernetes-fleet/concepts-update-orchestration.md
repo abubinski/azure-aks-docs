@@ -171,18 +171,19 @@ Examples:
 > [!NOTE]
 > When no `MaxConcurrency` value is specified, the system will default MaxConcurrency values to `stage.maxConcurrency = 10`, `group.maxConcurrency = 1`. Existing update strategies and update runs that were created before this feature was available will automatically receive these default values on the next PUT operation on the resource.
 
-> [!IMPORTANT]
-> The following upper limits apply to `MaxConcurrency` values:
->
-> * **Stage level**: Can't exceed the system limit of **10**.
-> * **Group level**: Can't exceed the stage-level `MaxConcurrency` value, and can't exceed the number of clusters that exist in the group.
-
 `MaxConcurrency` accepts two value forms:
 
 - **Fixed integer**: For example, `"3"` limits concurrency to exactly three clusters.
 - **Percentage**: For example, `"25%"` limits concurrency to a percentage of clusters. For stage-level settings, the percentage is calculated from all clusters in the stage. For group-level settings, the percentage is calculated from the clusters in that group. Percentages are calculated at runtime, rounded down, and enforced with a minimum resolved value of 1.
 
 The update strategy stores `MaxConcurrency` values as strings (for example, `"3"` or `"25%"`). When an update run is created from the strategy, these string values are resolved into concrete integers based on the actual cluster counts at that time. The resolved integer values are visible on the update run, so you can see exactly how many clusters are allowed to upgrade concurrently. For example, a strategy value of `"25%"` applied to a stage with 20 clusters resolves to `5` on the update run.
+
+> [!IMPORTANT]
+> The following upper limits apply to `MaxConcurrency` values:
+>
+> * **Stage level**: Can't exceed the system limit of **10**.
+> * **Group level**: Can't exceed the stage-level `MaxConcurrency` value, and can't exceed the number of clusters that exist in the group.
+> If a configured value exceeds these limits, validation fails and the PUT operation on the resource is rejected.
 
 ### Concurrency control suggestions
 If you want to upgrade with safety (less speed, but less likely to end with multiple broken clusters): set maximum concurrency to a smaller value.
