@@ -5,7 +5,7 @@ ms.subservice: aks-networking
 ms.custom: devx-track-arm-template, devx-track-azurecli
 author: allyford
 ms.topic: how-to
-ms.date: 06/17/2025
+ms.date: 02/18/2026
 ms.author: allyford
 zone_pivot_groups: arm-azure-cli
 # Customer intent: "As a DevOps engineer, I want to configure an HTTP proxy for AKS nodes, so that I can ensure secure outbound internet access in environments requiring proxy routing."
