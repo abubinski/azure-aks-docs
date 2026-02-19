@@ -151,7 +151,7 @@ An update strategy consists of one or more stages, where a stage can contain one
 
 For this scenario, we create stages and groups to match the details used for the Azure portal process.  
 
-1. Create a JSON file to define the stages and groups for the update run. Stages run sequentially in the order they appear in the JSON file. Groups run in parallel within each stage, so ordering isn't important. The following example file (*example-stages.json*) represents the strategy shown on the Azure portal instructions:
+1. Create a JSON file to define the stages and groups for the update run. Stages run sequentially in the order they appear in the JSON file. Groups run in parallel within each stage, so ordering isn't important. The following example file (*example-stages.json*) defines a strategy with two stages and includes optional `maxConcurrency` settings:
 
     ```json
     {
@@ -186,7 +186,7 @@ For this scenario, we create stages and groups to match the details used for the
     ```
 
     > [!NOTE]
-    > The `maxConcurrency` field is optional and controls how many clusters can upgrade concurrently at the stage or group level. Values can be a fixed integer (for example, `"3"`) or a percentage (for example, `"100%"`). If omitted, the system applies default values. For details on how these values are resolved and their upper limits, see [MaxConcurrency (preview)](./concepts-update-orchestration.md#maxconcurrency-preview).
+    > The `maxConcurrency` field is optional and controls how many clusters can upgrade concurrently at the stage or group level. Use a larger value to upgrade clusters faster across your fleet, or a smaller value for a more controlled rollout that limits the blast radius if issues arise. Values can be a fixed integer (for example, `"3"`) or a percentage (for example, `"100%"`). If omitted, the system applies default values. For details on how these values are resolved and their upper limits, see [MaxConcurrency (preview)](./concepts-update-orchestration.md#maxconcurrency-preview).
 
 1. Create a new update strategy using the [`az fleet updatestrategy create`][az-fleet-updatestrategy-create] command with the `--stages` flag set to the name of your JSON file.
 
