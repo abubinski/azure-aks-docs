@@ -41,10 +41,10 @@ When using the cluster stop/start feature, the following conditions apply:
 
 ## Stop an AKS cluster
 
-### [Azure CLI](#tab/azure-cli)
-
 > [!CAUTION]
 > If your cluster has a `ValidatingWebhookConfiguration` whose rules target cluster-scoped resources AKS manages during stop/start (such as nodes, leases, or clusterroles), the stop operation is rejected with a `ValidationError`. This includes webhooks with wildcard (`*`) rules on `apiGroups` or `resources`. To resolve, either narrow the webhook rules to only the resources you need (avoid wildcards), set `failurePolicy` to `Ignore`, or remove the webhook before stopping.
+
+### [Azure CLI](#tab/azure-cli)
 
 1. Use the [`az aks stop`][az-aks-stop] command to stop a running AKS cluster, including the nodes and control plane. The following example stops a cluster named *myAKSCluster*:
 
