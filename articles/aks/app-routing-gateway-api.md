@@ -33,15 +33,39 @@ The application routing add-on Kubernetes Gateway API implementation deploys an 
 
 ## Prerequisites
 
-* AZ CLI version.
-* After you [enable the application routing Gateway API implementation](#enable-the-application-routing-gateway-api-implementation), you must install the [Managed Gateway API CRDs][managed-gateway-api] prior to creating any Kubernetes Gateway API resources. Use of self-managed Gateway API CRDs with the application routing add-on is unsupported.
+* Install the `aks-preview` extension or update to the latest version of the extension using the [`az extension add`][az-extension-add] and [`az extension update`][az-extension-update] commands. if you're using Azure CLI. You must use `aks-preview` version `19.0.0b24` and later.
+
+    ```azurecli-interactive
+    # Install the aks-preview extension
+    az extension add --name aks-preview
+    
+    # Update the aks-preview extension to the latest version
+    az extension update --name aks-preview
+    ```
 
 ## Enable the application routing Gateway API implementation
 
-Run the following command to enable the application routing Gateway API implementation:
+Set environment variables
+
+```bash
+export CLUSTER=<cluster-name>
+export RESOURCE_GROUP=<resource-group-name>
+```
+
+### Enable during cluster creation
+
+Run the following command to enable the application routing Gateway API implementation during cluster creation:
 
 ```azurecli-interactive
+az aks create --resource-group ${RESOURCE_GROUP} --name ${CLUSTER} --enable-app-routing-istio
+```
 
+### Enable for an existing cluster
+
+Run the following command to enable the application routing Gateway API implementation for an existing cluster:
+
+```azurecli-interactive
+az aks update --resource-group ${RESOURCE_GROUP} --name ${CLUSTER} --enable-app-routing-istio
 ```
 
 You should see `istiod` pods in the `aks-istio-system` namespace:
@@ -245,7 +269,7 @@ The application routing Gateway API implementation supports customization of the
 Run the following command to disable the application routing Gateway API implementation:
 
 ```azurecli-interactive
-
+az aks update --resource-group ${RESOURCE_GROUP} --name ${CLUSTER} --disable-app-routing-istio
 ```
 
 ### Cleanup Resources
