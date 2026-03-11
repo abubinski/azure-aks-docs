@@ -19,9 +19,6 @@ One way to route Hypertext Transfer Protocol (HTTP) and secure (HTTPS) traffic t
 
 This article shows you how to deploy and configure a basic Ingress controller in your AKS cluster.
 
-> [!NOTE]
-> Due to the [retirement of the Ingress NGINX][aks-nginx-retirement] project, it is highly recommended to migrate to the [application routing Gateway API implementation][app-routing-gateway-api]. Microsoft will provide official support for Application Routing add-on Ingress NGINX resources through November 2026 and only for critical security patches during this period.
-
 ## Application routing add-on with NGINX features
 
 The application routing add-on with NGINX delivers the following:

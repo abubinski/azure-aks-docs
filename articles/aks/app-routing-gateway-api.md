@@ -14,15 +14,14 @@ ms.author: nshankar
 
 [!INCLUDE [preview features callout](~/reusable-content/ce-skilling/azure/includes/aks/includes/preview/preview-callout.md)]
 
-The application routing add-on now supports the Kubernetes Gateway API for ingress traffic management. If you are using [managed NGINX][app-routing-nginx] with the legacy Ingress API, migrating to using the Kubernetes Gateway API implementation is strongly recommended.
+The application routing add-on now supports the Kubernetes Gateway API for ingress traffic management. If you are using [managed NGINX][app-routing-nginx] with the legacy Ingress API, you must migrate to the application routing Gateway API implementation, or another supported implementation, by November 2026.
 
 The application routing add-on Kubernetes Gateway API implementation deploys an Istio control plane to manage infrastructure for Kubernetes Gateway API resources. However, it differs from the [Istio service mesh add-on for AKS][istio-addon] in the following ways:
-
 | Feature | Application routing Gateway API | Istio service mesh add-on |
 |---------|--------------------------------|---------------------------|
 | Gateway Class name | `approuting-istio` | `istio` |
 | Sidecar injection and Istio CRD support | Not supported. Only manages infrastructure for Kubernetes Gateway API resources | Supported |
-| Revisioning and upgrades | Not [revisioned][istio-revisions]. Upgraded in-place for both minor and patch version updates | Revisioned. Upgraded via [canary upgrades][istio-canary-upgrades]for minor version updates and in-place for patch version updates |
+| Revisioning and upgrades | Not [revisioned][istio-revisions]. Upgraded in-place for both minor and patch version updates | Revisioned. Upgraded via [canary upgrades][istio-canary-upgrades] for minor version updates and in-place for patch version updates |
 
 ## Limitations
 
@@ -197,257 +196,8 @@ curl -s -I -HHost:httpbin.example.com "http://$INGRESS_HOST/get"
 
 You should see an `HTTP 200` response.
 
-### Securing ingress traffic with the Kubernetes Gateway API
-
-The application routing add-on supports syncing secrets from Azure Key Vault (AKV) for securing Gateway API ingress traffic with TLS termination. Follow the steps below to create certificates and keys to terminate TLS traffic at the Gateway.
-
-#### Required client/server certificates and keys
-
-1. Create a root certificate and private key for signing the certificates for sample services:
-
-```bash
-mkdir httpbin_certs
-openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -subj '/O=example Inc./CN=example.com' -keyout httpbin_certs/example.com.key -out httpbin_certs/example.com.crt
-```
-
-2. Generate a certificate and a private key for `httpbin.example.com`:
-
-```bash
-openssl req -out httpbin_certs/httpbin.example.com.csr -newkey rsa:2048 -nodes -keyout httpbin_certs/httpbin.example.com.key -subj "/CN=httpbin.example.com/O=httpbin organization"
-openssl x509 -req -sha256 -days 365 -CA httpbin_certs/example.com.crt -CAkey httpbin_certs/example.com.key -set_serial 0 -in httpbin_certs/httpbin.example.com.csr -out httpbin_certs/httpbin.example.com.crt
-```
-
-#### Configure a TLS ingress gateway
-
-##### Set up Azure Key Vault and sync secrets to the cluster
-
-1. Create Azure Key Vault
-
-    You need an [Azure Key Vault resource][akv-quickstart] to supply the certificate and key inputs to the application routing add-on.
-
-    ```bash
-    export AKV_NAME=<azure-key-vault-resource-name>  
-    az keyvault create --name $AKV_NAME --resource-group $RESOURCE_GROUP --location $LOCATION
-    ```
-    
-2. Enable [Azure Key Vault provider for Secret Store CSI Driver][akv-addon] add-on on your cluster.
-
-    ```bash
-    az aks enable-addons --addons azure-keyvault-secrets-provider --resource-group $RESOURCE_GROUP --name $CLUSTER
-    ```
-    
-3. If your Key Vault is using Azure RBAC for the permissions model, follow the instructions [here][akv-rbac-guide] to assign an Azure role of Key Vault Secrets User for the add-on's user-assigned managed identity. Alternatively, if your key vault is using the vault access policy permissions model, authorize the user-assigned managed identity of the add-on to access Azure Key Vault resource using access policy:
-    
-    ```bash
-    OBJECT_ID=$(az aks show --resource-group $RESOURCE_GROUP --name $CLUSTER --query 'addonProfiles.azureKeyvaultSecretsProvider.identity.objectId' -o tsv | tr -d '\r')
-    CLIENT_ID=$(az aks show --resource-group $RESOURCE_GROUP --name $CLUSTER --query 'addonProfiles.azureKeyvaultSecretsProvider.identity.clientId')
-    TENANT_ID=$(az keyvault show --resource-group $RESOURCE_GROUP --name $AKV_NAME --query 'properties.tenantId')
-    
-    az keyvault set-policy --name $AKV_NAME --object-id $OBJECT_ID --secret-permissions get list
-    ```
-
-4. Create secrets in Azure Key Vault using the certificates and keys.
-
-    ```bash
-    az keyvault secret set --vault-name $AKV_NAME --name test-httpbin-key --file httpbin_certs/httpbin.example.com.key
-    az keyvault secret set --vault-name $AKV_NAME --name test-httpbin-crt --file httpbin_certs/httpbin.example.com.crt
-    ```
-
-5. Use the following manifest to deploy SecretProviderClass to provide Azure Key Vault specific parameters to the CSI driver.
-    
-    ```bash
-    cat <<EOF | kubectl apply -f -
-    apiVersion: secrets-store.csi.x-k8s.io/v1
-    kind: SecretProviderClass
-    metadata:
-      name: httpbin-credential-spc
-    spec:
-      provider: azure
-      secretObjects:
-      - secretName: httpbin-credential
-        type: kubernetes.io/tls
-        data:
-        - objectName: test-httpbin-key
-          key: tls.key
-        - objectName: test-httpbin-crt
-          key: tls.crt
-      parameters:
-        useVMManagedIdentity: "true"
-        userAssignedIdentityID: $CLIENT_ID 
-        keyvaultName: $AKV_NAME
-        cloudName: ""
-        objects:  |
-          array:
-            - |
-              objectName: test-httpbin-key
-              objectType: secret
-              objectAlias: "test-httpbin-key"
-            - |
-              objectName: test-httpbin-crt
-              objectType: secret
-              objectAlias: "test-httpbin-crt"
-        tenantId: $TENANT_ID
-    EOF
-    ```
-
-    Alternatively, to reference a certificate object type directly from Azure Key Vault, use the following manifest to deploy SecretProviderClass. In this example, `test-httpbin-cert-pxf` is the name of the certificate object in Azure Key Vault. Refer to [obtain certificates and keys][akv-csi-driver-obtain-cert-and-keys] section for more information. 
-    
-    ```bash
-    cat <<EOF | kubectl apply -f -
-    apiVersion: secrets-store.csi.x-k8s.io/v1
-    kind: SecretProviderClass
-    metadata:
-      name: httpbin-credential-spc
-    spec:
-      provider: azure
-      secretObjects:
-      - secretName: httpbin-credential
-        type: kubernetes.io/tls
-        data:
-        - objectName: test-httpbin-key
-          key: tls.key
-        - objectName: test-httpbin-crt
-          key: tls.crt
-      parameters:
-        useVMManagedIdentity: "true"
-        userAssignedIdentityID: $CLIENT_ID 
-        keyvaultName: $AKV_NAME
-        cloudName: ""
-        objects:  |
-          array:
-            - |
-              objectName: test-httpbin-cert-pfx  #certificate object name from keyvault
-              objectType: secret
-              objectAlias: "test-httpbin-key"
-            - |
-              objectName: test-httpbin-cert-pfx #certificate object name from keyvault
-              objectType: cert
-              objectAlias: "test-httpbin-crt"
-        tenantId: $TENANT_ID
-    EOF
-    ``` 
-
-6. Use the following manifest to deploy a sample pod. The secret store CSI driver requires a pod to reference the SecretProviderClass resource to ensure secrets sync from Azure Key Vault to the cluster.
-    
-    ```bash
-    cat <<EOF | kubectl apply -f -
-    apiVersion: v1
-    kind: Pod
-    metadata:
-      name: secrets-store-sync-httpbin
-    spec:
-      containers:
-        - name: busybox
-          image: mcr.microsoft.com/oss/busybox/busybox:1.33.1
-          command:
-            - "/bin/sleep"
-            - "10"
-          volumeMounts:
-          - name: secrets-store01-inline
-            mountPath: "/mnt/secrets-store"
-            readOnly: true
-      volumes:
-        - name: secrets-store01-inline
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: "httpbin-credential-spc"
-    EOF
-    ```
-
-    - Verify that the `httpbin-credential` secret is created in the `default` namespace as defined in the SecretProviderClass resource.
-    
-        ```bash
-        kubectl describe secret/httpbin-credential
-        ```       
-        Example output:
-        ```output
-        Name:         httpbin-credential
-        Namespace:    default
-        Labels:       secrets-store.csi.k8s.io/managed=true
-        Annotations:  <none>
-        
-        Type:  kubernetes.io/tls
-        
-        Data
-        ====
-        tls.crt:  1180 bytes
-        tls.key:  1675 bytes
-        ```
-
-##### Deploy TLS Gateway
-
-1. Create a Kubernetes Gateway that references the `httpbin-credential` secret under the TLS configuration:
-
-    ```bash
-    cat <<EOF | kubectl apply -f -
-    apiVersion: gateway.networking.k8s.io/v1
-    kind: Gateway
-    metadata:
-      name: httpbin-gateway
-    spec:
-      gatewayClassName: approuting-istio
-      listeners:
-      - name: https
-        hostname: "httpbin.example.com"
-        port: 443
-        protocol: HTTPS
-        tls:
-          mode: Terminate
-          certificateRefs:
-          - name: httpbin-credential
-        allowedRoutes:
-          namespaces:
-            from: Selector
-            selector:
-              matchLabels:
-                kubernetes.io/metadata.name: default
-    EOF
-    ```
-
-    Then, create a corresponding `HTTPRoute` to configure the gateway's ingress traffic routes:
-
-    ```bash
-    cat <<EOF | kubectl apply -f -
-    apiVersion: gateway.networking.k8s.io/v1
-    kind: HTTPRoute
-    metadata:
-      name: httpbin
-    spec:
-      parentRefs:
-      - name: httpbin-gateway
-      hostnames: ["httpbin.example.com"]
-      rules:
-      - matches:
-        - path:
-            type: PathPrefix
-            value: /status
-        - path:
-            type: PathPrefix
-            value: /delay
-        backendRefs:
-        - name: httpbin
-          port: 8000
-    EOF
-    ```
-
-    Get the gateway address and port:
-
-    ```bash
-    kubectl wait --for=condition=programmed gateways.gateway.networking.k8s.io httpbin-gateway
-    export INGRESS_HOST=$(kubectl get gateways.gateway.networking.k8s.io httpbin-gateway -o jsonpath='{.status.addresses[0].value}')
-    export SECURE_INGRESS_PORT=$(kubectl get gateways.gateway.networking.k8s.io httpbin-gateway -o jsonpath='{.spec.listeners[?(@.name=="https")].port}')
-    ```
-
-2. Send an HTTPS request to access the `httpbin` service:
-
-    ```bash
-    curl -v -HHost:httpbin.example.com --resolve "httpbin.example.com:$SECURE_INGRESS_PORT:$INGRESS_HOST" \
-    --cacert httpbin_certs/example.com.crt "https://httpbin.example.com:$SECURE_INGRESS_PORT/status/418"
-    ```
-
-    You should see the httpbin service return the 418 I’m a Teapot code.
+> [!NOTE]
+> To secure ingress traffic with the application routing Gateway API implementation, see the [following guide][app-routing-gateway-api-tls] to sync secrets from Azure Key Vault (AKV) for securing Gateway API ingress traffic with TLS termination.
 
 ## Versioning and Upgrades
 
@@ -459,21 +209,17 @@ To find the maximum supported Istio minor version for your AKS Kubernetes versio
 
 ### Upgrades
 
-Upgrades of Istio control plane for the application routing Gateway API implementation occur in-place and are triggered in the following two scenarios:
-
+Patch version and minor version upgrades of Istio control plane for the application routing Gateway API implementation occur in-place. Patch version upgrades of the Istio control plane are triggered automatically as part of AKS releases. Minor version upgrades can be triggered automatically or manually depending on the AKS Kubernetes version and timing of Istio minor version releases. Minor version upgrades occur in the following two scenarios:
 - The AKS cluster is upgraded to a new version which has a higher maximum supported Istio version pinned to it. The Istio control plane will be upgraded to the higher minor version as part of the AKS cluster upgrade.
 - A new Istio version is released for AKS and is now the maximum supported Istio version for the AKS cluster version. The Istio control plane on your cluster will **automatically** be upgraded to the new minor version after the release is rolled out to your region. Follow the [AKS release notes][aks-release-notes] and [AKS release tracker][aks-release-tracker] to track new Istio version releases and see when the new version has rolled out to your region.
 
 It's possible that traffic disruptions could occur during the upgrade process. To minimize disruptions during upgrades, the application routing add-on deploys a Horizontal Pod Autoscaler (HPA) with 2 minimum replicas and a PodDisruptionBudget (PDB) with a minimum availability of 1 for each `Gateway`. You can [customize these resources](#resource-customizations) to modify these settings.
 
-> [!NOTE]
-> Patch version upgrades of the Istio control plane are triggered automatically as part of AKS releases. Minor version upgrades can be triggered either automatically or manually depending on the AKS Kubernetes version and timing of Istio minor version releases.
-
 ## Resource customizations
 
 ### Control plane Horizontal Pod Autoscaling (HPA) customization
 
-application routing Gateway API implementation supports customization of the Istio control plane Horizontal Pod Autoscaler (HPA). The `istiod` HPA resource has the following default configurations:
+The application routing Gateway API implementation supports customization of the Istio control plane Horizontal Pod Autoscaler (HPA). The `istiod` HPA resource has the following default configurations:
 - Min Replicas: 2
 - Max Replicas: 5
 - CPU Utilization: 80%
@@ -484,7 +230,7 @@ application routing Gateway API implementation supports customization of the Ist
 The HPA configuration can be modified through patches and direct edits. Example:
 
 ```bash
-kubectl patch hpa istio -n aks-istio-system --type merge --patch '{"spec": {"minReplicas": 3, "maxReplicas": 6}}'
+kubectl patch hpa istiod -n aks-istio-system --type merge --patch '{"spec": {"minReplicas": 3, "maxReplicas": 6}}'
 ```
 
 ### Gateway resource customization
@@ -525,8 +271,11 @@ kubectl delete pod secrets-store-sync-httpbin
 kubectl delete secretproviderclass httpbin-credential-spc
 ```
 
-<!-- LINKS - internal -->
+## Next steps
 
+[Secure ingress traffic with the application routing Gateway API implementation][app-routing-gateway-api-tls]
+
+<!-- LINKS - internal -->
 [annotation-customization]: istio-gateway-api.md#annotation-customizations
 [app-routing-nginx]: app-routing.md
 [app-routing-dns-tls]: app-routing-dns-ssl.md
@@ -541,6 +290,8 @@ kubectl delete secretproviderclass httpbin-credential-spc
 [istio-meshconfig]: istio-meshconfig.md#allowed-supported-and-blocked-meshconfig-values
 [istio-support-policy]: istio-support-policy.md#allowed-supported-and-blocked-customizations
 [istio-canary-upgrades]: ./istio-upgrade.md#minor-revision-upgrade
+[nginx-retirement]: ./includes/ingress-nginx-retirement.md
+[app-routing-gateway-api-tls]: ./app-routing-gateway-api-tls.md
 
 <!-- LINKS - external -->
 [aks-release-notes]: https://github.com/azure/aks/releases

@@ -93,9 +93,6 @@ The example manifest creates an external ingress load balancer service that's ac
     > By default, the Istio control plane will append the `GatewayClass` name `istio` to the name of the resources that it provisions for the `Gateway`. You can annotate your `Gateway` resource with `gateway.istio.io/name-override` to override the name of the provisioned resources. The resource names must be less than `63` characters and must be a valid DNS name.
 
     > [!NOTE]
-    > If you are performing a [minor revision upgrade][istio-upgrade] and have two Istio add-on revisions installed on your cluster simultaneously, by default the control plane for the higher minor revision takes ownership of the `Gateways`. You can add the `istio.io/rev` label to the `Gateway` to control which control plane revision owns it. If you add the revision label, make sure that you update it accordingly to the appropriate control plane revision before rolling back or completing the upgrade operation.
-
-    > [!NOTE]
     > If you're performing a [minor revision upgrade][istio-upgrade] and have two Istio service mesh add-on revisions installed on your cluster simultaneously, the control plane for the higher minor revision takes ownership of the `Gateways` by default. You can add the `istio.io/rev` label to the `Gateway` to control which control plane revision owns it. If you add the revision label, make sure that you update it accordingly to the appropriate control plane revision before rolling back or completing the upgrade operation.
 
 ## Verify resource creation
