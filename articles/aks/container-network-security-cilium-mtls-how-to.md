@@ -170,47 +170,47 @@ ztunnel exposes a local admin endpoint that allows inspecting its active configu
 
 Select a ztunnel pod.
 
-    ```bash
-    kubectl get pods -n kube-system \
-      -l app.kubernetes.io/name=ztunnel-cilium \
-      -o wide
-    ```
+```bash
+kubectl get pods -n kube-system \
+-l app.kubernetes.io/name=ztunnel-cilium \
+-o wide
+```
 
 Port-forward the ztunnel admin endpoint. ztunnel exposes an admin API on port 15000 (localhost-only by default).
 
-    ```bash
-    kubectl port-forward -n kube-system <ZTUNNEL_POD> 15000:15000
-    ```
+```bash
+kubectl port-forward -n kube-system <ZTUNNEL_POD> 15000:15000
+```
 
 Inspect the ztunnel configuration dump.
 
-    ```bash
-    curl -s http://localhost:15000/config_dump | jq
-    ```
+```bash
+curl -s http://localhost:15000/config_dump | jq
+```
 
 Verify your pod is registered. Search the config dump for your workload's SPIFFE identity or namespace/service account. You should see entries like the following output:
 
-    ```json
-    "workloads": [
-      {
-        "capacity": 1,
-        "clusterId": "Kubernetes",
-        "name": "test-server-5dc49df4cf-grr2f",
-        "namespace": "ztunnel-test-enrolled",
-        "networkMode": "Standard",
-        "node": "10.224.0.5",
-        "protocol": "HBONE",
-        "serviceAccount": "default",
-        "status": "Healthy",
-        "trustDomain": "cluster.local",
-        "uid": "30f37433-a83f-4e30-9946-f62cf5d10924",
-        "workloadIps": [
-          "192.168.0.50"
-        ],
-        "workloadType": "deployment"
-      }
-    ]
-    ```
+```json
+"workloads": [
+    {
+    "capacity": 1,
+    "clusterId": "Kubernetes",
+    "name": "test-server-5dc49df4cf-grr2f",
+    "namespace": "ztunnel-test-enrolled",
+    "networkMode": "Standard",
+    "node": "10.224.0.5",
+    "protocol": "HBONE",
+    "serviceAccount": "default",
+    "status": "Healthy",
+    "trustDomain": "cluster.local",
+    "uid": "30f37433-a83f-4e30-9946-f62cf5d10924",
+    "workloadIps": [
+        "192.168.0.50"
+    ],
+    "workloadType": "deployment"
+    }
+]
+```
 
 ## Disable mTLS on an existing cluster
 

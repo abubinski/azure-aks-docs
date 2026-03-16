@@ -678,9 +678,9 @@
               - name: Cilium mTLS encryption
                 items:
                   - name: Overview
-                    href: container-network-security-cilium-mtls-encryption-concepts.md
+                    href: container-network-security-cilium-mtls-concepts.md
                   - name: Set up Cilium mTLS encryption
-                    href: how-to-apply-cilium-mtls-encryption.md              
+                    href: container-network-security-cilium-mtls-how-to.md              
               - name: FQDN-based filtering
                 items:
                   - name: Overview
