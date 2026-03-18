@@ -1,0 +1,77 @@
+---
+title: "Cross-cluster networking for Azure Kubernetes Fleet Manager concepts"
+description: This article provides a conceptual overview of Cross-cluster networking for Azure Kubernetes Fleet Manager. 
+ms.date: 03/18/2026
+author: sjwaight
+ms.author: simonwaight
+ms.service: azure-kubernetes-fleet-manager
+ms.topic: concept-article
+# Customer intent: "As a platform engineer, I want to understand the supporting concepts for cross-cluster networking in Azure Kubernetes Fleet Manager, so that I know how and where I can use cross-cluster networking."
+---
+
+# Cross-cluster networking for Azure Kubernetes Fleet Manager concepts
+
+Azure Kubernetes Fleet Manager provides a dedicated cross-cluster networking solution that extends the Kubernetes datapath across multiple clusters. Using cross-cluster networking enables any connected cluster to communicate directly with endpoints on any other connected cluster with full network‑policy enforcement. Using cross-cluster networking allowing clusters to publish services such that any connected cluster can call them as if they were local.
+
+Multiple cross-cluster network profiles can be created in Fleet Manager, with the only restriction being that member clusters can only participate in a single cross-cluster network. 
+
+In this article, we introduce key concepts for cross-cluster networking for Azure Kubernetes Fleet Manager.
+
+## Prerequisites and limitations
+
+* Fleet Manager member clusters can only participate in a single cross-cluster network at any time.
+* Clusters must have [Advanced Container Networking Services (ACNS)][aks-acns-enabled] with Cilium enabled.
+* Self-managed Cilium multi-cluster can't be deployed at the same time. 
+* A cross-cluster network can have up to 255 member clusters.
+* Cross-cluster networking's Cilium components are updated as part of AKS releases.
+* The Cilium version deployed and features enabled are set by ACNS and can't currently be modified. 
+
+## Foundational concepts
+
+Cross-cluster networking for Azure Kubernetes Fleet Manager provides a Fleet-managed [Cilium multi-cluster][cilium-intro] deployment which removes the overhead of configuring and managing Cilium multi-cluster's data plane components on each member cluster.
+
+When a cluster joins a cross-cluster network, the Cilium agent (cilium-agent) and clustermesh-apiserver is deployed on the cluster's control plane by Fleet Manager. Existing clusters on the same cross-cluster network are updated with the newly added cluster's details and the Cilium agent configures eBPF-based networking to allow pods on each cluster to communicate directly without proxies or gateways.
+
+Each cluster retains its local CIDR IP addressing configuration for pods and service, with the local Cilium components responsible for routing so pods in one cluster can reach services in remote clusters as if they were local. 
+
+For traffic flow control, Cilium network policies ([CiliumNetworkPolicy][cilium-network-policy]) can be used to control cross-cluster data flow, allowing administrators to enforce boundaries within the cross-cluster network.
+
+## Defining global services
+
+Kubernetes [Services][kube-services] on any cross-cluster networking member can be made globally available on the cross-cluster network by adding an annotation of `service.cilium.io/global` with the value set to `true`. Deploying the Service with this annotation to multiple cross-cluster networking member clusters transparently load balances requests across those clusters.
+
+You can temporarily remove a cluster from a load balanced global service by adding an annotation of `service.cilium.io/shared` with a value of `false`. This is useful if you don't wish to completely remove the Service or cluster.   
+
+You can try cross-cluster networking by following the how-to-guide: [Configure and use Fleet Manager Cross Cluster Connectivity (preview)][howto-configure-cross-cluster]
+
+## Debugging and troubleshooting
+
+The standard Cilium commandline interface (CLI) tools work with cross-cluster networking for Fleet Manager. Some commands such `upgrade` and `clustermesh connect` don't work because they perform actions Fleet Manager is responsible for.
+
+Here's the high-level steps to getting started with debugging and troubleshooting:
+
+* Install the latest stable Cilium CLI for your operating system from the official [Cilium CLI GitHub repository][cilium-cli-github].
+* Select a cross-cluster network member cluster and retrieve it's kubeconfig by using the [`az aks get-credentials`][az-aks-get-credentials] command.
+* Use the Cilium CLI, passing the cluster context using the `--context` parameter.
+
+The Cilium CLI can manage multiple Cilium versions.
+
+## Updating cross-cluster networking
+
+One reason to adopt cross-cluster networking over installing and running Cilium multi-cluster yourself is that Fleet Manager will keep Cilium's components up to date.
+
+Cross-cluster networking's Cilium component updates are bundled as part of AKS Kubernetes releases. This simplifies upgrades by ensuring Cilium components work with the Kubernetes version your cluster run, ensuring the cross-cluster network remains stable.
+
+This approach means you can use Fleet Manager's [Update Runs and Strategies][fleet-update-runs] to upgrade the control plane of your clusters, defining the order in which clusters are updated. 
+
+<!-- INTERNAL LINKS -->
+[aks-acns-enabled]: ../aks/use-advanced-container-networking-services.md?pivots=cilium
+[howto-configure-cross-cluster]: ./howto-configure-use-cross-cluster-networking.md
+[az-aks-get-credentials]: /cli/azure/aks#az-aks-get-credentials
+[fleet-update-runs]: ./concepts-update-orchestration.md
+
+<!-- EXTERNAL LINKS -->
+[kube-services]: https://kubernetes.io/docs/concepts/services-networking/service/
+[cilium-intro]: https://docs.cilium.io/en/stable/network/clustermesh/intro/
+[cilium-network-policy]: https://docs.cilium.io/en/latest/security/policy/index.html
+[cilium-cli-github]: https://github.com/cilium/cilium-cli
