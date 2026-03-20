@@ -1,7 +1,7 @@
 ---
 title: Security bulletins for Azure Kubernetes Service (AKS)
 description: This article provides security/vulnerability related updates and troubleshooting guides for Azure Kubernetes Services (AKS).
-ms.date: 10/23/2025
+ms.date: 03/20/2026
 author: bcho
 ms.author: bahe
 ms.topic: concept-article
