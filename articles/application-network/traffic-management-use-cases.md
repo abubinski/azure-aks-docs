@@ -1,14 +1,16 @@
 ---
-title: Traffic Management Use Cases for Azure Kubernetes Application Network
+title: Traffic Management Use Cases for Azure Kubernetes Application Network (Preview)
 description: Learn how to use Azure Kubernetes Application Network for traffic management with Istio ambient mode and Kubernetes Gateway API, including L4/L7 authorization policies, JWT claim-based routing, traffic shifting, and fault injection across multiple AKS clusters.
-author: schaffererin
-ms.author: schaffererin
+author: kochhars
+ms.author: kochhars
 ms.service: azure
 ms.topic: how-to
 ms.date: 03/19/2026
 ---
 
-# Traffic management use cases for Azure Kubernetes Application Network
+# Traffic management use cases for Azure Kubernetes Application Network (preview)
+
+[!INCLUDE [preview features callout](~/reusable-content/ce-skilling/azure/includes/aks/includes/preview/preview-callout.md)]
 
 Azure Kubernetes Application Network traffic management uses Istio [ambient mode](https://istio.io/latest/docs/ambient/) and the [Kubernetes Gateway API](https://kubernetes.io/docs/concepts/services-networking/gateway/) to enable precise control over service-to-service interactions within and across clusters. This solution offers a comprehensive set of traffic management capabilities, including:
 

@@ -1,6 +1,6 @@
 ### YamlMime:Landing
 
-title: Azure Kubernetes Application Network
+title: Azure Kubernetes Application Network (Preview)
 summary: Azure Kubernetes Application Network provides a fully-managed service network solution for your AKS workloads. Learn more with these overviews and tutorials. # < 160 chars
 
 metadata:

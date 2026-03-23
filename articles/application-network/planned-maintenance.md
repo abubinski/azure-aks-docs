@@ -1,5 +1,5 @@
 ---
-title: Schedule Upgrades for Azure Kubernetes Application Network Members using Planned Maintenance
+title: Schedule Upgrades for Azure Kubernetes Application Network Members using Planned Maintenance (Preview)
 description: Learn how to use planned maintenance to schedule component upgrades for Azure Kubernetes Application Network members, including in-cluster data plane components and control plane components.
 author: kochhars
 ms.author: kochhars
@@ -8,7 +8,9 @@ ms.topic: how-to
 ms.date: 03/13/2026
 ---
 
-# Use planned maintenance to schedule upgrades for Azure Kubernetes Application Network members
+# Use planned maintenance to schedule upgrades for Azure Kubernetes Application Network members (preview)
+
+[!INCLUDE [preview features callout](~/reusable-content/ce-skilling/azure/includes/aks/includes/preview/preview-callout.md)]
 
 This article shows you how to use planned maintenance to schedule component upgrades for Azure Kubernetes Application Network members.
 
