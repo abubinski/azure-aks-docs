@@ -47,6 +47,8 @@ landingContent:
         links:
           - text: Manage upgrades
             url: upgrades.md
+          - text: Use planned maintenance to schedule upgrades
+            url: planned-maintenance.md
   
   # Card (optional)
   - title: Observability

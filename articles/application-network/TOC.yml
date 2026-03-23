@@ -16,6 +16,8 @@
     href: supported-versions.md
   - name: Manage upgrades
     href: upgrades.md
+  - name: Use planned maintenance to schedule upgrades
+    href: planned-maintenance.md
 - name: Observability
   items:
   - name: Overview
