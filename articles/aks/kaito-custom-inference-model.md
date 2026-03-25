@@ -26,7 +26,7 @@ In this article, you learn how to onboard a sample HuggingFace model for inferen
 
 ## Choose an open-source language model from HuggingFace
 
-In this example, we use the [BigScience Bloom-1B7](https://huggingface.co/bigscience/bloom-1b7) small language model. Alternatively, you can choose from thousands of text-generation models supported on [HuggingFace](https://huggingface.co/models?pipeline_tag=text-generation).
+In this example, we use the [HuggingFaceTB SmolLM2-1.7B-Instruct](https://huggingface.co/HuggingFaceTB/SmolLM2-1.7B-Instruct) small language model. Alternatively, you can choose from thousands of text-generation models supported on [HuggingFace](https://huggingface.co/models?pipeline_tag=text-generation).
 
 1. Connect to your AKS cluster using the [`az aks get-credentials`](/cli/azure/aks#az-aks-get-credentials) command.
 
@@ -64,7 +64,7 @@ In this example, we use the [BigScience Bloom-1B7](https://huggingface.co/bigsci
         spec:
           containers:
             - name: custom-llm-container
-              image: mcr.microsoft.com/aks/kaito/kaito-base:0.0.8 # KAITO base image which includes hf runtime
+              image: mcr.microsoft.com/aks/kaito/kaito-base:0.2.0 # KAITO base image which includes hf runtime
               livenessProbe:
                 failureThreshold: 3
                 httpGet:
@@ -106,7 +106,7 @@ In this example, we use the [BigScience Bloom-1B7](https://huggingface.co/bigsci
                 - "--trust_remote_code"
                 - "--allow_remote_files"
                 - "--pretrained_model_name_or_path"
-                - "bloom-1b7"
+                - "HuggingFaceTB/SmolLM2-1.7B-Instruct"
                 - "--torch_dtype"
                 - "bfloat16"
               # env:
@@ -153,11 +153,11 @@ In this example, we use the [BigScience Bloom-1B7](https://huggingface.co/bigsci
 3. Test your custom model inference service with a sample input of your choice using the [OpenAI API format](https://platform.openai.com/docs/api-reference/chat):
 
     ```bash
-       kubectl run -it --rm --restart=Never curl --image=curlimages/curl -- curl -X POST http://$SERVICE_IP/v1/completions \
+    kubectl run -it --rm --restart=Never curl --image=curlimages/curl -- curl -X POST http://$SERVICE_IP/v1/chat/completions \
       -H "Content-Type: application/json" \
       -d '{
-        "model": "bloom-1b7",
-        "prompt": "What sport should I play in rainy weather?",
+        "model": "HuggingFaceTB/SmolLM2-1.7B-Instruct",
+        "messages": [{"role": "user", "content": "What sport should I play in rainy weather?"}],
         "max_tokens": 20
       }'
     ```
