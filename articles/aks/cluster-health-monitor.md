@@ -38,8 +38,8 @@ For DNS-specific checks, Cluster Health Monitor can automatically remediate a Co
 
 ## Before you begin
 
-- Install the Azure CLI version 2.XX.0 or later. You can run az --version to verify the version. To install or upgrade, see [Install Azure CLI][azure-cli-install].
-- Install the `aks-preview` Azure CLI extension version 19.XX or later:
+- Install the Azure CLI version 2.73.0 or later. You can run az --version to verify the version. To install or upgrade, see [Install Azure CLI][azure-cli-install].
+- Install the `aks-preview` Azure CLI extension version 19.0.0b25 or later:
 
 	```azurecli-interactive
 	az extension add --name aks-preview
