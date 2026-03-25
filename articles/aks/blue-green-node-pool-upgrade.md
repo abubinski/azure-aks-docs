@@ -209,6 +209,17 @@ You can customize the following blue-green upgrade properties (`NodePoolBlueGree
         --resource-group myResourceGroup
     ```
 
+## Rollback a blue-green upgrade
+
+- Once an ongoing blue-green upgrade is canceled, the rollback can be initiated using the [`az aks nodepool rollback`](/cli/azure/aks/nodepool#az-aks-nodepool-rollback) command. The following example performs a rollback of the blue-green upgrade for the node pool named `myNodePool` in the AKS cluster `myAKSCluster` within the resource group `myResourceGroup`:
+
+    ```azurecli-interactive
+    az aks nodepool rollback \
+        --name myNodePool \
+        --cluster-name myAKSCluster \
+        --resource-group myResourceGroup
+    ```
+
 ## Frequently asked questions (FAQs)
 
 ### Do blue-green upgrades support the `maxUnavailable` setting?
