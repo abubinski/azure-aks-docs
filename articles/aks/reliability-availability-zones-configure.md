@@ -215,7 +215,7 @@ Terraform configuration files define the infrastructure that Terraform creates a
 
 1. Create a file named `main.tf` and add the following code to define the Terraform version and specify the Azure provider:
 
-    ```tf
+    ```Terraform
     terraform {
     required_version = ">= 1.0"
     required_providers {
@@ -232,7 +232,7 @@ Terraform configuration files define the infrastructure that Terraform creates a
 
 1. Add the following code to `main.tf` to create an Azure resource group. Feel free to change the name and location of the resource group as needed.
 
-    ```tf
+    ```Terraform
     resource "azurerm_resource_group" "example" {
      name     = "aks-rg"
      location = "East US"
@@ -243,7 +243,7 @@ Terraform configuration files define the infrastructure that Terraform creates a
 
 Add the following code to `main.tf` to create an AKS cluster with a zone-spanning system node pool in all three availability zones with one node in each availability zone:
 
-```tf
+```Terraform
 resource "azurerm_kubernetes_cluster" "example" {
   name                = "aks-zones"
   location            = azurerm_resource_group.example.location
@@ -265,7 +265,7 @@ resource "azurerm_kubernetes_cluster" "example" {
 
 Add the following code to `main.tf` to create a new zone-spanning user node pool with two nodes in each availability zone:
 
-```tf
+```Terraform
 resource "azurerm_kubernetes_cluster_node_pool" "zonespan" {
   name                  = "userpool"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.example.id
@@ -279,7 +279,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "zonespan" {
 
 Add the following code to `main.tf` to create three new zone-aligned user node pools with two nodes in each availability zone:
 
-```tf
+```Terraform
 resource "azurerm_kubernetes_cluster_node_pool" "zone1" {
   name                  = "userpool1"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.example.id
