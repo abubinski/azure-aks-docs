@@ -3,7 +3,7 @@ title: Configure Availability Zones in Azure Kubernetes Service (AKS)
 description: Learn how to configure availability zones in Azure Kubernetes Service (AKS) to increase the availability of your applications.
 ms.service: azure-kubernetes-service
 ms.topic: how-to
-ms.date: 07/28/2025
+ms.date: 03/26/2026
 author: schaffererin
 ms.author: schaffererin
 zone_pivot_groups: azure-cli-or-terraform
@@ -72,6 +72,8 @@ The system node pool zones are configured when you create a cluster or node pool
 
 In zone-spanning node pools, nodes are spread across all selected zones. AKS automatically balances the number of nodes between zones. If a zone outage occurs, nodes within the affected zone might be impacted, but nodes in other availability zones remain unaffected.
 
+<!--
+
 :::zone pivot="azure-cli"
 
 You can specify zones using the `--zones` parameter when creating an AKS cluster using the [`az aks create`][az-aks-create] command or node pool using the [`az aks nodepool add`][az-aks-nodepool-add] command. For example:
@@ -86,12 +88,16 @@ az aks nodepool add --resource-group example-rg --cluster-name example-cluster -
 
 :::zone-end
 
+-->
+
 #### Zone-aligned node pools
 
 > [!NOTE]
 > If a single workload is deployed across node pools, we recommend setting `--balance-similar-node-groups` to `true` to maintain a balanced distribution of nodes across zones for your workloads during scale-up operations.
 
 In this configuration, each node is aligned (pinned) to a specific zone. You can use this configuration when you need [lower latency between nodes](/azure/aks/reduce-latency-ppg), more granular control over scaling operations, or when you're using the [cluster autoscaler](./cluster-autoscaler-overview.md).
+
+<!--
 
 :::zone pivot="azure-cli"
 
@@ -106,6 +112,8 @@ az aks nodepool add --resource-group example-rg --cluster-name example-cluster -
 
 :::zone-end
 
+-->
+
 #### Regional node pools
 
 Regional mode is used when you don't set a zone assignment in the deployment template (for example, `"zones"=[]` or `"zones"=null`).
@@ -113,6 +121,8 @@ Regional mode is used when you don't set a zone assignment in the deployment tem
 In this configuration, the node pool creates regional (not zone-pinned) instances and implicitly places instances throughout the region. There's no guarantee that instances are balanced or spread across zones, or that instances are in the same availability zone. In the rare case of a full zone outage, any or all instances within the node pool might be affected.
 
 ## Deployments
+
+Azure Kubernetes Service (AKS) uses pods, storage and volumes, and load balancers across zones to maintain high availability for your applications.
 
 ### Pods
 
@@ -206,6 +216,65 @@ spec:
     - port: 80
       targetPort: 8080
 ```
+
+
+:::zone pivot="azure-cli"
+
+## Create node pools with Azure CLI
+
+Use Azure CLI to create an AKS cluster and zone-spanning node pools with availability zones and zone-aligned node pools with availability zones.
+
+### Create zone-spanning node pools
+
+You can specify zones using the `--zones` parameter when creating an AKS cluster using the [`az aks create`][az-aks-create] command or node pool using the [`az aks nodepool add`][az-aks-nodepool-add] command. For example:
+
+```azurecli-interactive
+# Create an AKS cluster with a zone-spanning system node pool in all three availability zones with one node in each availability zone
+az aks create \
+  --resource-group example-rg \
+  --name example-cluster \
+  --node-count 3 \
+  --zones 1 2 3
+
+# Add one new zone-spanning user node pool with two nodes in each availability zone
+az aks nodepool add \
+  --resource-group example-rg \
+  --cluster-name example-cluster \
+  --name userpoola  \
+  --node-count 6 \
+  --zones 1 2 3
+```
+
+### Create zone-aligned node pools
+
+The following commands create three node pools for a region with three availability zones using the [`az aks nodepool add`][az-aks-nodepool-add] command with the `--zones` parameter to specify the zone for each node pool:
+
+```azurecli-interactive
+# Add three new zone-aligned user node pools with two nodes in each
+az aks nodepool add \
+  --resource-group example-rg \
+  --cluster-name example-cluster \
+  --name userpoolx  \
+  --node-count 2 \
+  --zones 1
+
+az aks nodepool add \
+  --resource-group example-rg \
+  --cluster-name example-cluster \
+  --name userpooly  \
+  --node-count 2 \
+  --zones 2
+
+az aks nodepool add \
+  --resource-group example-rg \
+  --cluster-name example-cluster \
+  --name userpoolz  \
+  --node-count 2 \
+  --zones 3
+```
+
+:::zone-end
+
 
 :::zone pivot="terraform"
 
