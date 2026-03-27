@@ -130,10 +130,6 @@ az aks nodepool add --name <node-pool-name> --cluster-name <cluster-name> --reso
 
 After you apply custom node configuration, you can confirm the settings were applied to the nodes by [connecting to the host][node-access] and verifying `sysctl` or configuration changes were made on the filesystem.
 
-## Failure modes and symptoms of misconfiguration
-
-[ADD CONTENT ABOUT FAILURE MODES AND SYMPTOMS OF MISCONFIGURATION]
-
 ## Supported custom configuration parameters
 
 > [!IMPORTANT]
@@ -238,13 +234,18 @@ The following table lists the kernel settings that you can customize per node po
 | `transparentHugePageEnabled` | `always`, `madvise`, `never` | `always` | `always` | `madvise` | [Transparent Hugepages](https://www.kernel.org/doc/html/latest/admin-guide/mm/transhuge.html#admin-guide-transhuge) is a Linux kernel feature intended to improve performance by making more efficient use of your processor's memory-mapping hardware. When enabled the kernel attempts to allocate `hugepages` whenever possible and any Linux process receives 2-MB pages if the `mmap` region is 2 MB naturally aligned. In certain cases when `hugepages` are enabled system wide, applications might end up allocating more memory resources. An application might `mmap` a large region but only touch 1 byte of it, in that case a 2-MB page might be allocated instead of a 4k page for no good reason. This scenario is why it's possible to disable `hugepages` system-wide or to only have them inside `MADV_HUGEPAGE madvise` regions. |
 | `transparentHugePageDefrag` | `always`, `defer`, `defer+madvise`, `madvise`, `never` | `madvise` | `madvise` | `madvise` | This value controls whether the kernel should make aggressive use of memory compaction to make more `hugepages` available. |
 
-## Upgrade behavior with custom configuration
+## Considerations for custom node configurations
 
-[ADD CONTENT ABOUT UPGRADE BEHAVIOR]
+Keep the following considerations in mind when customizing your node configuration:
 
-## Best practices and considerations
-
-[ADD CONTENT ABOUT BEST PRACTICES AND CONSIDERATIONS]
+- Custom node configurations are reapplied during node image upgrades.
+- Custom node configurations are preserved during scale-out operations.
+- Custom node configurations are validated during Kubernetes version upgrades.
+- Custom node configurations are rejected if they contain unsupported parameters or invalid values.
+- AKS doesn't perform pre-flight validation of the custom node configuration parameters or values. Ensure that the custom node configuration parameters and values you specify are supported and valid to avoid potential issues with your cluster nodes.
+- Default values for custom node configuration parameters often change with new operating system versions. When applying custom node configurations, review the default values for the parameters you're configuring to ensure that your custom settings are appropriate for the OS version of your cluster nodes.
+- We recommmend limiting the number of people who have permissions to modify the custom node configuration to prevent unintended consequences on cluster stability and performance. Consider using Azure Role-Based Access Control (RBAC) to restrict access to cluster configuration settings.
+- We recommend separating node pools with custom configurations from those without custom configurations to prevent unintended consequences on workloads that might be sensitive to certain configuration changes. For example, if you have a critical workload that requires specific kubelet settings, consider isolating that workload to a dedicated node pool with the necessary custom kubelet configuration.
 
 ## Related content
 
