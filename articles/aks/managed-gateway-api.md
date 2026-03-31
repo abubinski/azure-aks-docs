@@ -16,6 +16,9 @@ The [Kubernetes Gateway API][kubernetes-gateway-api] is a specification for traf
 
 The Managed Gateway API Installation for Azure Kubernetes Service (AKS) installs the Custom Resource Definitions (CRDs) for the Kubernetes Gateway API. You can install these CRDs independently of any specific Gateway API implementation.
 
+> [!NOTE]
+> The Managed Gateway API installation only installs and manages the Gateway API CRDs. You can use these CRDs with your own Gateway API implementation, but AKS support only applies when you use the Managed Gateway API installation with a supported AKS add-on or extension that implements the Gateway API. BYO proxies or other self-managed Gateway API implementations aren't supported by AKS.
+
 ## Prerequisites
 
 - If you already have an existing installation of the Gateway API CRDs on your cluster, you must meet the following requirements:
