@@ -98,6 +98,7 @@ az aks create \
 ## Create a private AKS cluster with advanced networking
 
 Create a private cluster with advanced networking using the [`az aks create`][az-aks-create] command.
+
 **Key parameters in this command**:
 
 - `--enable-private-cluster`: Enables private cluster mode.
