@@ -67,7 +67,7 @@ The following table maps Cluster Autoscaler profile settings to Node Auto Provis
 
 ### Limitations
 
-Visit our [NAP Documentation](./node-auto-provisioning.md#limitations-and-unsupported-features) for requirements and limitations.
+See [NAP limitations and unsupported features](./node-auto-provisioning.md#limitations-and-unsupported-features).
 
 ## Disable cluster autoscaler
 
@@ -77,10 +77,10 @@ Visit our [NAP Documentation](./node-auto-provisioning.md#limitations-and-unsupp
 - Right-size workloads for consolidation.
   - Set proper [resource requests/limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container), replicas, and [pod disruption budgets (PDBs)](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget) to allow for a gradual migration. This migration method requires properly set PDBs to ensure well-managed disruption of your workloads. 
 - Verify your system node pool is active.
-  - AKS requires a system node pool for system components (such as CoreDNS, Karpenter, etc.). When NAP is enabled, AKS is responsible for autoscaling the system pool.
+  - AKS requires a system node pool for system components (such as CoreDNS and Karpenter). When NAP is enabled, AKS is responsible for autoscaling the system pool.
  
 > [!IMPORTANT]
-> If your workloads depend on custom subnets or network policies, configure custom subnets or network policies in the AKSNodeClass **before migrating workloads** to avoid scheduling failures. Visit our [AKSNodeClass documentation](./node-auto-provisioning-aksnodeclass.md) for details.
+> If your workloads depend on custom subnets or network policies, configure custom subnets or network policies in the AKSNodeClass **before migrating workloads** to avoid scheduling failures. See the [AKSNodeClass documentation](./node-auto-provisioning-aksnodeclass.md) for details.
 
 ### Disable cluster autoscaler safely
 
@@ -90,7 +90,7 @@ If cluster autoscaler is enabled cluster-wide, disable it at the cluster level u
 az aks update --resource-group myResourceGroup --name myAKSCluster --disable-cluster-autoscaler
 ```
 
-If cluster autoscaler is only enabled on select node pools, you can disable cluster autoscaler for specific node pools using the `--disable-cluster-autoscaler` flag.
+If cluster autoscaler is only enabled on select node pools, disable cluster autoscaler for specific node pools using the `--disable-cluster-autoscaler` flag.
 
 ```azurecli-interactive
 # Disable CAS on a specific pool
@@ -332,7 +332,7 @@ As pods evict, node auto provisioning provisions replacement nodes per your Node
 > [!NOTE]
 > We recommend a gradual scale down in waves, and watch replicas/PDBs to avoid dips in availability.
 
-To confirm that the scale down is working and workloads are being scheduled to NAP-managed nodes safely, you can check:
+To confirm that the scale down is working and workloads are being scheduled to NAP-managed nodes safely, check:
 
 - Custom resource definition files are active
 - Karpenter events detailing NAP decisions
@@ -348,14 +348,14 @@ Check CRDs to confirm they are in use:
 kubectl get crd | grep karpenter
 ```
 
-View full descriptions of each field using Help API in Kubernetes using the `kubectl explain` command:
+View field descriptions with the `kubectl explain` command:
 
 ```bash
 # Use help api to describe fields
 kubectl explain nodepool.spec
 ```
 
-## Confirm new NAP-managed nodes are being created
+### Confirm new NAP-managed nodes are being created
 
 To ensure that NAP is properly provisioning new nodes in response to pending pod pressure, verify that the new nodes are being created. Node auto provisioning produces cluster events that can be used to monitor deployment and scheduling decisions being made. You can view events through the Kubernetes events stream.
 
@@ -363,13 +363,13 @@ To ensure that NAP is properly provisioning new nodes in response to pending pod
 kubectl get events -A --field-selector source=karpenter -w
 ```
 
-Alternatively you can view the NodeClaims that represent the nodes being created: 
+Alternatively, view the NodeClaims that represent the nodes being created: 
 
 ```bash
 kubectl get nodeclaims
 ```
 
-You should see a list of nodes NAP is provisioning. This confirms that NAP is provisioning nodes in response to pending pod pressure.
+A populated list confirms NAP is responding to pending pod pressure.
 
 
 
@@ -387,10 +387,10 @@ kubectl -n kube-system delete deploy/cluster-autoscaler
 
 After you have completed your migration, there are more capabilities to fine tune your cluster.
 
-- **Manage disruption behavior** - Tune disruption `consolidationPolicy` and `consolidateAfter` windows to balance cost vs. virtual machine churn. To learn more, visit our [NAP Disruption documentation][nap-disruption-doc]
-- **Multiple NodePools** - Split by workload class (for example, Spot vs On-Demand, GPU vs CPU) and use requirements, weights, and taints to control placement. To learn more, visit our [NAP NodePool documentation][nap-nodepool-doc]
-- **Networking** - For more information on managing networking experiences like custom virtual networks, visit our [NAP networking documentation][nap-networking-doc]
-- **Observability** - Stream Karpenter events and expose NAP control-plane metrics via Azure Monitor managed Prometheus. For more visit our [NAP public documentation][nap-observability]
+- **Manage disruption behavior** - Tune disruption `consolidationPolicy` and `consolidateAfter` windows to balance cost vs. virtual machine churn. See the [NAP Disruption documentation][nap-disruption-doc].
+- **Multiple NodePools** - Split by workload class (for example, Spot vs On-Demand, GPU vs CPU) and use requirements, weights, and taints to control placement. See the [NAP NodePool documentation][nap-nodepool-doc].
+- **Networking** - For more information on managing networking with custom virtual networks, see the [NAP networking documentation][nap-networking-doc].
+- **Observability** - Stream Karpenter events and expose NAP control-plane metrics via Azure Monitor managed Prometheus. See the [NAP observability documentation][nap-observability].
 
 ## Next steps
 
