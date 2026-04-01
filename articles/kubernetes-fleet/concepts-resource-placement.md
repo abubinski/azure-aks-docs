@@ -35,22 +35,22 @@ Fleet Manager's resource placement capability is based on the [KubeFleet CNCF pr
 
 :::zone target="docs" pivot="cluster-scope"
 
-## Overview of ClusterResourcePlacement
+## Overview of Cluster-scoped resource placement
 
-`ClusterResourcePlacement` (CRP) is used to distribute a given set of cluster-scoped resource or namespaces from the fleet hub cluster onto member clusters. By default, a namespace that is selected using CRP will include all resource within the namespace.
+Use the ClusterResourcePlacement (CRP) custom resource to distribute a given set of cluster-scoped resource or entire namespaces from the fleet hub cluster onto member clusters.
 
-For scenarios requiring fine-grained control over individual namespace-scoped resources within a namespace, see [`ResourcePlacement`](./concepts-namespace-scoped-resource-propagation.md), which enables selective propagation of specific resources rather than entire namespaces.
+With CRP, you can:
 
-With `ClusterResourcePlacement`, you can:
-
-* Select which resources to propagate. These can be cluster-scoped Kubernetes resources defined using [Kubernetes Group Version Kind (GVK)](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#api-groups) references, or a namespace, which propagates the namespace and all its resources.
+* Select which Kubernetes resources to distribute. These can be cluster-scoped Kubernetes resources defined using [Kubernetes Group Version Kind (GVK)](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#api-groups) references, or a namespace, which distributes the namespace and all its resources.
 * Specify placement policies to select member clusters. These policies can explicitly select clusters by names, or dynamically select clusters based on cluster labels and properties. 
 * Specify rollout strategies to safely roll out any updates of the selected Kubernetes resources to multiple target clusters.
-* View the propagation progress for each target cluster.
+* View the rollout progress for each target cluster.
+
+For scenarios requiring fine-grained control over individual namespace-scoped resources within a namespace, see [`ResourcePlacement`](./concepts-namespace-scoped-resource-propagation.md?pivot=namespace-scope), which enables selective propagation of specific resources rather than entire namespaces.
 
 ## Resource selection
 
-`ClusterResourcePlacement` supports selecting cluster-scoped resources and namespaces using resource selectors. Each resource selector can specify:
+Select cluster-scoped resources and namespaces using one or more `resourceSelectors` in a CRP. Each resource selector can specify:
 
 * **Group, Version, Kind (GVK)**: The type of Kubernetes resource to select.
 * **Name**: The name of a specific resource.
@@ -58,7 +58,7 @@ With `ClusterResourcePlacement`, you can:
 
 ### Namespace selection scope (preview)
 
-When selecting a namespace resource, you can use the `selectionScope` field to control whether to propagate only the namespace itself or the namespace and all its contents:
+When using CRP to select an entire namespace, you can use the `selectionScope` field to control whether to include all the child resources in the namespace.
 
 * **Default behavior** (when `selectionScope` is not specified): Propagates the namespace and all resources within it.
 * **`NamespaceOnly`**: Propagates only the namespace object itself, without any resources within the namespace. This is useful when you want to establish namespaces across clusters while managing individual resources separately using [`ResourcePlacement`](./concepts-namespace-scoped-resource-propagation.md).
@@ -90,7 +90,7 @@ This approach enables a workflow where platform administrators use `ClusterResou
 
 :::zone target="docs" pivot="namespace-scope"
 
-## Overview of ResourcePlacement (preview)
+## Overview of Namespace-scoped resource placement (preview)
 
 `ResourcePlacement` is a namespace-scoped API that enables dynamic selection and multi-cluster propagation of namespace-scoped resources. It provides fine-grained control over how specific resources within a namespace are distributed across member clusters in a fleet.
 
