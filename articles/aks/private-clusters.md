@@ -835,7 +835,14 @@ az aks create \
 
 :::zone-end
 
-LEFT OFF HERE!!!!!!
+:::zone pivot="terraform"
+
+When using a custom private DNS zone, you're responsible for creating and managing the DNS infrastructure instead of relying on Azure-managed DNS. This includes creating the DNS zone, linking it to your VNet, and assigning the necessary permissions for AKS to manage records.
+
+For custom DNS configurations, you must use a user-assigned managed identity with the [Private DNS Zone Contributor][private-dns-zone-contributor-role] and [Network Contributor][network-contributor-role] roles.
+
+
+
 
 ## Create a private AKS cluster with a custom private DNS zone and custom subdomain
 
