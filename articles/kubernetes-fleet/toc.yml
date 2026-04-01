@@ -36,18 +36,18 @@
           href: concepts-fleet-kubernetes-version-support.md
         - name: Fleet and Arc integration
           href: concepts-fleet-arc-integration.md
-    - name: Multi-cluster Kubernetes and node images upgrades
+    - name: Safe multi-cluster upgrades
       href: concepts-update-orchestration.md
-    - name: Multi-cluster multi-tenancy with Managed Fleet Namespaces
+    - name: Multi-tenancy with Managed Fleet Namespaces
       href: concepts-fleet-managed-namespace.md    
-    - name: Multi-cluster workload management
+    - name: Multi-cluster resource management
       items:
-        - name: Multi-cluster workload management overview
-          href: concepts-multi-cluster-workload-management.md
-        - name: Managing workloads using cluster resource placement
+        - name: Multi-cluster resource management overview
+          href: concepts-multi-cluster-resource-management.md
+        - name: Managing resources using cluster resource placement
           items:
-          - name: Introduction to ClusterResourcePlacement
-            href: concepts-resource-propagation.md
+          - name: Introduction to resource placement
+            href: concepts-resource-placement.md
           - name: Introduction to ResourcePlacement
             href: concepts-namespace-scoped-resource-propagation.md
           - name: Defining a placement rollout strategy

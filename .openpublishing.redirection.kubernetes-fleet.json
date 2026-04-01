@@ -39,6 +39,11 @@
       "source_path_from_root": "/articles/kubernetes-fleet/cluster-resource-override.md",
       "redirect_url": "/azure/kubernetes-fleet/howto-use-overrides-customize-resources-placement",
       "redirect_document_id": false
+    },
+    {
+      "source_path_from_root": "/articles/kubernetes-fleet/concepts-resource-placement.md",
+      "redirect_url": "/azure/kubernetes-fleet/concepts-resource-propagation",
+      "redirect_document_id": false
     }
   ]
 }
