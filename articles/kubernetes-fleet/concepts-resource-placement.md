@@ -418,7 +418,9 @@ The table summarizes the available scheduling policy fields for each placement t
 | `numberOfClusters`          | ❌ | ❌ | ✅ |
 | `topologySpreadConstraints` | ❌ | ❌ | ✅ | 
 
-### Selecting clusters based on labels and properties 
+## How to select clusters in policies
+
+Fleet Manager intelligent resource placement provides a set of powerful criteria you can use when determining how clusters are selection. In this section we'll take a look at how you can use these options to build policies to suit your needs.    
 
 #### Available labels and properties to select clusters  
 
@@ -426,7 +428,7 @@ When using the `PickN` and `PickAll` placement types, you can use the following 
 
 ##### Labels
 
-The following labels are automatically added to all member clusters and can be used for target cluster selection in resource placement policies. 
+In addition to any custom labels you apply to `MemberCluster` resource on the hub cluster, you can use the any of the following labels which are automatically added to all member clusters. 
 
 | Label | Description |
 |----------|-------------|
@@ -434,7 +436,7 @@ The following labels are automatically added to all member clusters and can be u
 | fleet.azure.com/resource-group | Azure Resource Group of the cluster (rg_prodapps_01) |
 | fleet.azure.com/subscription-id | Azure Subscription Identifier the cluster resides in. Formatted as UUID/GUID. |
 | fleet.azure.com/cluster-name | The name of the cluster |
-| fleet.azure.com/member-name | The name of the Fleet member corresponding to the cluster |
+| fleet.azure.com/member-name | The name of the Fleet Manager member cluster name corresponding to the cluster |
 
 You can also use any custom labels you apply to your clusters.
 
