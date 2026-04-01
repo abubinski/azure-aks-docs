@@ -473,7 +473,7 @@ The following properties are available for use as part of placement policies.
 
 When using cluster properties in a policy criteria, you specify:
 
-* **Name**: Name of the property, which is one the properties [listed in properties](#properties) in this article. 
+* **Name**: Name of the property, which is one the properties [listed in properties](#cluster-properties) in this article. 
 
 * **Operator**: An operator used to express the condition between the constraint/desired value and the observed value on the cluster. The following operators are currently supported:
 
@@ -945,14 +945,12 @@ This coordinated approach ensures that `ResourcePlacement` provides the flexibil
 
 `ResourcePlacement` uses the same placement patterns as `ClusterResourcePlacement`:
 
-- **[Placement types](./concepts-resource-placement.md#placement-types)**: `PickAll`, `PickFixed`, and `PickN` strategies work identically for both APIs.
+- **[Placement types](./concepts-resource-placement.md#placement-policy)**: `PickAll`, `PickFixed`, and `PickN` strategies work identically for both APIs.
 - **[Rollout strategy](./concepts-rollout-strategy.md)**: Control how updates propagate across clusters with the same rolling update mechanisms.
 - **[Status and observability](./howto-understand-placement.md)**: Monitor deployment progress using `kubectl describe resourceplacement <name> -n <namespace>`.
 - **[Advanced features](./concepts-resource-placement.md)**: Use tolerations, resource overrides, topology spread constraints, and affinity rules.
 
 The key difference is in **resource selection** scope. While `ClusterResourcePlacement` typically selects entire namespaces and their contents, `ResourcePlacement` provides fine-grained control over individual namespace-scoped resources.
-
-For complete details on these capabilities, refer to the [ClusterResourcePlacement documentation](./concepts-resource-placement.md#resource-selection).
 
 :::zone-end
 
