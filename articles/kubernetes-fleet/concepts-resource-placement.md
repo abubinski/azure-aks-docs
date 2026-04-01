@@ -16,13 +16,7 @@ zone_pivot_groups: cluster-namespace-scope
 
 Managing Kubernetes resources across multiple clusters presents significant challenges for both platform administrators and application developers. As organizations scale their Kubernetes infrastructure beyond a single cluster, they often encounter complexities related to resource distribution, consistency maintenance, and manual management overhead. The traditional approach of managing each cluster independently creates operational silos that become increasingly difficult to maintain as the fleet size grows.
 
-In this article we explore how multi-cluster users can use Fleet Manager's intelligent resource placement capability to place cluster and namespace-scoped Kubernetes resources across member clusters in a fleet.
-
-:::zone target="docs" pivot="cluster-scope"
-
-This article describes the ClusterResourcePlacement API, which enables [resource placement from hub clusters to member clusters](./concepts-multi-cluster-workload-management.md) using Azure Kubernetes Fleet Manager.
-
-Platform admins often need to deploy Kubernetes resources onto multiple clusters for various reasons, for example:
+Platform administrators often need to deploy Kubernetes resources onto multiple clusters for various reasons, including:
 
 * Managing access control using roles and role bindings across multiple clusters.
 * Running infrastructure applications, such as Prometheus or Flux, that need to be on all clusters.
@@ -33,14 +27,17 @@ Application developers often need to deploy Kubernetes resources onto multiple c
 * Deploying a shopping cart application into two paired regions for customers to continue to shop during a single region outage.
 * Deploying a batch compute application into clusters with inexpensive spot node pools available.
 
-It's tedious to create, update, and track these Kubernetes resources across multiple clusters manually. Fleet Manager provides Kubernetes resource propagation to enable at-scale management of Kubernetes resources. With Fleet Manager, you can create Kubernetes resources on a Fleet-managed hub cluster 
-and propagate them to selected member clusters via Kubernetes Custom Resources: `MemberCluster` and `ClusterResourcePlacement`.
+It's tedious and potentially error-prone to create, update, and track these Kubernetes resources across multiple clusters manually. 
 
-Fleet Manager's support for custom resources is based on the [KubeFleet CNCF project](https://kubefleet.dev/).
+In this article we explore how multi-cluster users can use Fleet Manager's intelligent resource placement capability to place cluster and namespace-scoped Kubernetes resources across member clusters in a fleet. Select the scope (cluster or namespace) to review documentation appropriate to your needs. 
 
-## ClusterResourcePlacement API overview
+Fleet Manager's resource placement capability is based on the [KubeFleet CNCF project](https://kubefleet.dev/).
 
-A `ClusterResourcePlacement` object is used to tell the fleet scheduler how to place a given set of cluster-scoped objects from the fleet hub cluster onto member clusters. When selecting a namespace, all namespace-scoped objects within it—like Deployments, StatefulSets, DaemonSets, ConfigMaps, Secrets, and PersistentVolumeClaims—are included and propagated together.
+:::zone target="docs" pivot="cluster-scope"
+
+## Overview of ClusterResourcePlacement
+
+`ClusterResourcePlacement` is used to distribute a given set of cluster-scoped objects from the fleet hub cluster onto member clusters. When selecting a namespace, all namespace-scoped objects within it—like Deployments, StatefulSets, DaemonSets, ConfigMaps, Secrets, and PersistentVolumeClaims—are included and propagated together.
 
 For scenarios requiring fine-grained control over individual namespace-scoped resources within a namespace, see [`ResourcePlacement`](./concepts-namespace-scoped-resource-propagation.md), which enables selective propagation of specific resources rather than entire namespaces.
 
@@ -626,7 +623,9 @@ Resource-only changes (updating the resources or updating the `ResourceSelector`
 
 :::zone target="docs" pivot="namespace-scope"
 
-This article describes the `ResourcePlacement` API, which enables fine-grained control over namespace-scoped Kubernetes resources across member clusters using Azure Kubernetes Fleet Manager.
+## Overview of ResourcePlacement (preview)
+
+The `ResourcePlacement` API enables fine-grained control over namespace-scoped Kubernetes resource placements across member clusters in Azure Kubernetes Fleet Manager.
 
 [!INCLUDE [preview features note](./includes/preview/preview-callout.md)]
 
