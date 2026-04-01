@@ -29,7 +29,7 @@ Application developers often need to deploy Kubernetes resources onto multiple c
 
 It's tedious and potentially error-prone to create, update, and track these Kubernetes resources across multiple clusters manually. 
 
-In this article we explore how multi-cluster users can use Fleet Manager's intelligent resource placement capability to place cluster and namespace-scoped Kubernetes resources that are staged on the [Fleet Manager hub cluster](./access-fleet-hub-cluster-kubernetes-api.md) across member clusters in a fleet. Select the scope (cluster or namespace) to review documentation appropriate to your needs. 
+In this article we explore how multi-cluster users can use Fleet Manager's intelligent resource placement capability to place cluster and namespace-scoped Kubernetes resources that are staged on the [Fleet Manager hub cluster](./access-fleet-hub-cluster-kubernetes-api.md) across member clusters in a fleet. 
 
 Fleet Manager's resource placement capability is based on the [KubeFleet CNCF project](https://kubefleet.dev/).
 
@@ -37,7 +37,7 @@ Fleet Manager's resource placement capability is based on the [KubeFleet CNCF pr
 
 ## Overview of cluster-scoped resource placement
 
-Use the ClusterResourcePlacement (CRP) custom resource to distribute a given set of cluster-scoped resource or entire namespaces from the fleet hub cluster onto member clusters.
+Use a ClusterResourcePlacement (CRP) to distribute a given set of cluster-scoped resource or entire namespaces from the Fleet Manager hub cluster onto one or more member cluster.
 
 With CRP, you can:
 
@@ -92,16 +92,16 @@ This approach enables a workflow where platform administrators use `ClusterResou
 
 ## Overview of namespace-scoped resource placement
 
-`ResourcePlacement` is a namespace-scoped API that enables dynamic selection and multi-cluster propagation of namespace-scoped resources. It provides fine-grained control over how specific resources within a namespace are distributed across member clusters in a fleet.
+Use a ResourcePlacement (RP) to distribute a given set of resources within a specific namespace from the Fleet Manager hub cluster onto one or more member cluster. ResourcePlacement provides fine-grained control over how specific resources within a namespace are distributed across member clusters.
 
 > [!IMPORTANT]
 > `ResourcePlacement` uses the `placement.kubernetes-fleet.io/v1beta1` API version and is currently in preview. Some features demonstrated in this article, such as `selectionScope` in `ClusterResourcePlacement`, are also part of the v1beta1 API and aren't available in the v1 API.
 
 **Key characteristics:**
 
-- **Namespace-scoped**: Both the `ResourcePlacement` object and the resources it manages exist within the same namespace.
-- **Selective**: Can target specific resources by type, name, or labels rather than entire namespaces.
-- **Declarative**: Uses the same placement patterns as `ClusterResourcePlacement` for consistent behavior.
+- **Namespace-scoped**: Both `ResourcePlacement` and the resources it selects exist within the same namespace.
+- **Selective**: selects specific resources within a namespace by type, name, or labels rather than entire namespaces.
+- **Declarative**: Uses the same placement policies as `ClusterResourcePlacement` for consistent behavior.
 
 A `ResourcePlacement` consists of three core components:
 
@@ -130,9 +130,26 @@ In multi-cluster environments, workloads often consist of both cluster-scoped an
 > [!NOTE]
 > `ResourcePlacement` can be used together with `ClusterResourcePlacement` in namespace-only mode. For example, you can use CRP to deploy the namespace, while using RP for fine-grained management of specific resources like environment-specific ConfigMaps or Secrets within that namespace.
 
-## Placement types
+:::zone-end
 
-The following placement types are available for controlling the number of clusters to which a specified Kubernetes resource needs to be propagated:
+## Resource selection
+
+Select cluster-scoped resources and namespaces using one or more `resourceSelectors` in a CRP. Each resource selector can specify:
+
+* **Group, Version, Kind (GVK)**: The type of Kubernetes resource to select.
+* **Name**: The name of a specific resource.
+* **Label selectors**: Labels to match multiple resources.
+
+
+
+
+
+
+
+
+## Placement policy types
+
+The following placement policy types are available for controlling the how clusters are selected by Fleet Manager resource placement:
 
 * **[PickFixed](#pickfixed-placement-type)** places the resource onto a specific list of member clusters by name.
 * **[PickAll](#pickall-placement-type)** places the resource onto all member clusters, or all member clusters that meet a criteria. This policy is useful for placing infrastructure workloads, like cluster monitoring or reporting applications.
