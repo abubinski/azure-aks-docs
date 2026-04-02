@@ -642,35 +642,6 @@ A property sorter consists of:
 
 For more information, see the [KubeFleet documentation on property-based scheduling][kubefleet-props].
 
-## Encapsulating resources using envelope objects
-
-It's important to understand that the Fleet Manager hub cluster is also a Kubernetes cluster. Any resource you want to distribute is first applied to the hub cluster, which can lead to:
-
-1. **Unintended side effects**: ValidatingWebhookConfigurations, MutatingWebhookConfigurations, or Admission Controllers become active on the hub cluster, potentially intercepting and affecting hub cluster operations.
-
-2. **Security Risks**: RBAC resources (Roles, ClusterRoles, RoleBindings, ClusterRoleBindings) intended for member clusters could grant or restrict permissions on the hub cluster.
-
-3. **Resource Limitations**: ResourceQuotas, FlowSchema, or LimitRanges defined for member clusters take effect on the hub cluster.
-
-To avoid unnecessary side effects, Fleet Manager provides custom envelope resources (ClusterResourceEnvelope and ResourceEnvelope) to wrap objects to avoid these potential problems. 
-
-The envelope resource is applied to the hub cluster, but the resources it contains are extracted and applied when they reach member clusters. 
-
-For more information, see the documentation on [envelope objects][envelope-object].
-
-## Using Tolerations
-
-Resource placements support the specification of tolerations where each toleration consists of the following fields:
-
-* `key`: The key of the toleration.
-* `value`: The value of the toleration.
-* `effect`: The effect of the toleration, such as `NoSchedule`.
-* `operator`: The operator of the toleration, such as `Exists` or `Equal`.
-
-Each toleration is used to tolerate one or more specific taints applied on a `MemberCluster`. Once all taints are tolerated, the Flee Manager scheduler can distribute resources to the member cluster.
-
-For more information, see the [documentation on tolerations][fleet-tolerations].
-
 ## Configuring rollout strategy
 
 Fleet Manager resource placement uses a default `RollingUpdate` strategy to control how resources are distributed to member clusters.
@@ -734,9 +705,97 @@ Rollout status is considered successful if all resources were correctly applied 
 
 For more information, see the [documentation on rollout strategies][fleet-rollout].
 
+## Using tolerations
+
+Member clusters can be tainted in the same way that nodes in a cluster can be tainted. 
+
+Resource placements support the use of tolerations where each toleration consists of the following fields:
+
+* `key`: The key of the toleration.
+* `value`: The value of the toleration.
+* `effect`: The effect of the toleration, such as `NoSchedule`.
+* `operator`: The operator of the toleration, such as `Exists` or `Equal`.
+
+Each toleration is used to tolerate one or more specific taints applied on a `MemberCluster`. Once all taints are tolerated, Fleet Manager can distribute resources to the member cluster.
+
+:::zone target="docs" pivot="cluster-scope"
+
+```yaml
+apiVersion: placement.kubernetes-fleet.io/v1beta1
+kind: ClusterResourcePlacement
+metadata:
+  name: test-ns
+spec:
+  policy:
+    placementType: PickAll
+    tolerations:
+      - key: app-team-a
+        operator: Exists
+  resourceSelectors:
+    - group: ""
+      kind: Namespace
+      name: test-ns
+      version: v1
+  revisionHistoryLimit: 10
+  strategy:
+    type: RollingUpdate
+```
+:::zone-end
+
+:::zone target="docs" pivot="namespace-scope"
+
+```yaml
+apiVersion: placement.kubernetes-fleet.io/v1
+kind: ResourcePlacement
+metadata:
+  name: app-configs-rp-pickall-rolling
+  namespace: my-app
+spec:
+  resourceSelectors:
+    - group: ""
+      kind: ConfigMap
+      version: v1
+      labelSelector:
+        matchLabels:
+          app: my-application
+  policy:
+    placementType: PickAll
+    tolerations:
+      - key: app-team-a
+        operator: Exists
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+      unavailablePeriodSeconds: 60
+```
+
+:::zone-end
+
+For more information, see the [documentation on tolerations][fleet-tolerations].
+
+## Using envelope resources
+
+It's important to understand that the Fleet Manager hub cluster is also a Kubernetes cluster. Any resource you want to distribute is first applied to the hub cluster, which can lead to:
+
+1. **Unintended side effects**: ValidatingWebhookConfigurations, MutatingWebhookConfigurations, or Admission Controllers become active on the hub cluster, potentially intercepting and affecting hub cluster operations.
+
+2. **Security Risks**: RBAC resources (Roles, ClusterRoles, RoleBindings, ClusterRoleBindings) intended for member clusters could grant or restrict permissions on the hub cluster.
+
+3. **Resource Limitations**: ResourceQuotas, FlowSchema, or LimitRanges defined for member clusters take effect on the hub cluster.
+
+To avoid unnecessary side effects, Fleet Manager provides custom envelope resources (ClusterResourceEnvelope and ResourceEnvelope) to wrap objects to avoid these potential problems. 
+
+The envelope resource is applied to the hub cluster, but the resources it contains are extracted and applied when they reach member clusters. 
+
+For more information, see the documentation on [envelope objects][envelope-object].
+
 ## Determine placement status
 
 The Fleet scheduler provides two ways to view placement status depending on your access level and requirements:
+
+:::zone target="docs" pivot="cluster-scope"
 
 * **ClusterResourcePlacement status**: View placement status directly on the cluster-scoped `ClusterResourcePlacement` object. Use this approach when you have cluster-level permissions and need to view status for any placement across the fleet. This approach is the primary method for platform administrators.
 
