@@ -990,8 +990,6 @@ Updating the selected resources (i.e. modifying a `Deployment`) or updating the 
 
 :::zone-end
 
-:::zone target="docs" pivot="namespace-scope"
-
 ## Working with ResourcePlacement and ClusterResourcePlacement together
 
 While `ClusterResourcePlacement` assumes that namespaces represent application boundaries, real-world usage patterns are often more complex. Organizations frequently use namespaces as team boundaries rather than application boundaries, leading to several challenges that `ResourcePlacement` directly addresses:
@@ -1030,7 +1028,7 @@ The following table highlights the key differences between `ResourcePlacement` a
 
 Both `ResourcePlacement` and `ClusterResourcePlacement` share the same core capabilities for all other aspects not listed in the differences table.
 
-### Working with ClusterResourcePlacement
+### Example scenario using ResourcePlacement and ClusterResourcePlacement
 
 `ResourcePlacement` is designed to work in coordination with `ClusterResourcePlacement` (CRP) to provide a complete multi-cluster resource management solution. Understanding this relationship is crucial for effective fleet management.
 
@@ -1088,7 +1086,7 @@ spec:
     - cluster2
 ```
 
-### Best practices
+### Best practices for ResourcePlacement and ClusterResourcePlacement
 
 When using `ResourcePlacement` with `ClusterResourcePlacement`, follow these best practices:
 
@@ -1099,7 +1097,7 @@ When using `ResourcePlacement` with `ClusterResourcePlacement`, follow these bes
 
 This coordinated approach ensures that `ResourcePlacement` provides the flexibility teams need while maintaining the foundational infrastructure managed by platform operators.
 
-## Resource selection, placement, and rollout
+### Resource selection, placement, and rollout
 
 `ResourcePlacement` uses the same placement patterns as `ClusterResourcePlacement`:
 
