@@ -804,6 +804,14 @@ Fleet Manager resource placement provides two ways to view status depending on y
 
 * **ResourcePlacement status**: View placement status directly on the namespace-scoped `ResourcePlacement` resource. Use when you have namespace-level permissions and need to view status for a namespace-scoped placement across the fleet.
 
+### Viewing ClusterResourcePlacement status
+
+You can view this information using the `kubectl describe resourceplacement <rp-name>` command.
+
+```bash
+kubectl describe resourceplacement place-cmap-1
+```
+
 :::zone-end
 
 :::zone target="docs" pivot="cluster-scope"
@@ -815,11 +823,11 @@ Both approaches provide the following information:
 * The conditions that currently apply to the placement, which include if the placement was successfully completed.
 * A placement status section for each member cluster, which shows the status of deployment to that cluster.
 
-### Viewing ClusterResourcePlacement status
+### Use ClusterResourcePlacement status
 
 The following example shows viewing status directly from a `ClusterResourcePlacement` that deployed the `test` namespace and the `test-1` ConfigMap into two member clusters using `PickN`. The placement was successfully completed and the resources were placed into the `aks-member-1` and `aks-member-2` clusters.
 
-You can view this information using the `kubectl describe clusterresourceplacement <name>` command.
+You can view this information using the `kubectl describe clusterresourceplacement <crp-name>` command.
 
 ```bash
 kubectl describe clusterresourceplacement crp-1
@@ -921,22 +929,16 @@ Events:
   Normal  PlacementRolloutCompleted  3m28s (x7 over 3d22h)  cluster-resource-placement-controller  Resources have been applied to the selected clusters
 ```
 
-### ClusterResourcePlacementStatus (preview)
+### Use ClusterResourcePlacementStatus resource (preview)
+
+The `ClusterResourcePlacementStatus` is a namespace-scoped resource that provides the placement status of a corresponding cluster-scoped `ClusterResourcePlacement` object, allowing namespace users who don't have cluster-level rights to read the status.
 
 > [!IMPORTANT]
 > The `ClusterResourcePlacementStatus` resource and `StatusReportingScope` field are available in the `placement.kubernetes-fleet.io/v1beta1` API version as a preview feature. They aren't available in the `placement.kubernetes-fleet.io/v1` API.
 
-The `ClusterResourcePlacementStatus` is a namespace-scoped resource that provides the placement status of a corresponding cluster-scoped `ClusterResourcePlacement` object so it's accessible to users of the namespace who don't have cluster-level rights.
+To use this approach the `ClusterResourcePlacement` must be configured with `statusReportingScope: NamespaceAccessible` using the `v1beta1` API.
 
-For namespace users without cluster-level permissions, you can view the same placement status information through a namespace-scoped `ClusterResourcePlacementStatus` object. This approach requires the `ClusterResourcePlacement` to be configured with `statusReportingScope: NamespaceAccessible` using the v1beta1 API.
-
-Key features:
-
-* **Namespace-scoped access**: Allows users with namespace-level permissions to view placement status without requiring cluster-scoped access.
-* **Status mirroring**: Contains the same placement status information as the parent `ClusterResourcePlacement` but is accessible within a specific namespace.
-* **Optional feature**: Only created when `StatusReportingScope` is set to `NamespaceAccessible`. Once set, `StatusReportingScope` is immutable.
-
-When `StatusReportingScope` is set to `NamespaceAccessible` for a `ClusterResourcePlacement`, only one namespace resource selector is allowed, and can't be changed after creation.
+When `statusReportingScope` is set to `NamespaceAccessible`, only one namespace resource selector is allowed, and can't be changed after creation.
 
 #### Configuring ClusterResourcePlacementStatus
 
@@ -970,34 +972,29 @@ The output contains the same status information as the `ClusterResourcePlacement
 
 For more information, see the [documentation on how to understand the placement result][fleet-status].
 
+:::zone-end
+
 ## Placement change triggers
 
-The Fleet scheduler prioritizes the stability of existing workload placements. This prioritization can limit the number of changes that cause a workload to be removed and rescheduled. The following scenarios can trigger placement changes:
+The Fleet Manager scheduler prioritizes stability of existing resource placements which can limit the number of changes that cause a resource to be removed and rescheduled.
 
-* Placement policy changes in the `ClusterResourcePlacement` object can trigger removal and rescheduling of a workload.
-  * Scale out operations (increasing `numberOfClusters` with no other changes) places workloads only on new clusters and doesn't affect existing placements.
-* Cluster changes, including:
-  * A new cluster becoming eligible can trigger placement if the new cluster meets the placement policy, for example, a `PickAll` policy.
-  * A cluster with a placement is removed from the fleet. Depending on the policy, the scheduler attempts to place all affected workloads on remaining clusters without affecting existing placements.
+The following scenarios can trigger placement changes:
 
-Resource-only changes (updating the resources or updating the `ResourceSelector` in the `ClusterResourcePlacement` object) roll out gradually in existing placements but do **not** trigger rescheduling of the workload.
+* Placement policy changes in the resource placemen (`ClusterResourcePlacement` or `ResourcePlacement`) can trigger removal and rescheduling of a resource.
+    * Scale out operations (increasing `numberOfClusters` with no other changes) places workloads only on new clusters and doesn't affect existing placements.
+* Member cluster changes, including:
+    * A new member cluster becoming eligible and meets the placement policy, for example, a `PickAll` policy.
+    * A member cluster is removed from the fleet. Depending on the policy, the scheduler attempts to place all affected resources on remaining clusters without affecting existing placements.
+
+Updating the selected resources (i.e. modifying a `Deployment`) or updating the `resourceSelector` in a resource placement causes Fleet Manager to gradually roll out existing placements but **doesn't** trigger rescheduling (i.e. changing picked clusters) of the resource.
 
 :::zone-end
 
 :::zone target="docs" pivot="namespace-scope"
 
-`ResourcePlacement` (RP) was designed to address this gap by providing:
+## Working with ResourcePlacement and ClusterResourcePlacement together
 
-- **Namespace-scoped resource management**: Target specific resources within a namespace without affecting the entire namespace.
-- **Operational flexibility**: Allow teams to manage different resources within the same namespace independently.
-- **Complementary functionality**: Work alongside CRP to provide a complete multi-cluster resource management solution.
-
-> [!NOTE]
-> `ResourcePlacement` can be used together with `ClusterResourcePlacement` in namespace-only mode. For example, you can use CRP to deploy the namespace, while using RP for fine-grained management of specific resources like environment-specific ConfigMaps or Secrets within that namespace.
-
-### Real-world namespace usage patterns
-
-While CRP assumes that namespaces represent application boundaries, real-world usage patterns are often more complex. Organizations frequently use namespaces as team boundaries rather than application boundaries, leading to several challenges that `ResourcePlacement` directly addresses:
+While `ClusterResourcePlacement` assumes that namespaces represent application boundaries, real-world usage patterns are often more complex. Organizations frequently use namespaces as team boundaries rather than application boundaries, leading to several challenges that `ResourcePlacement` directly addresses:
 
 **Multi-application namespaces**: In many organizations, a single namespace contains multiple independent applications owned by the same team. These applications might have:
 
@@ -1019,11 +1016,7 @@ While CRP assumes that namespaces represent application boundaries, real-world u
 
 This granular approach ensures that `ResourcePlacement` can adapt to diverse organizational structures and workload patterns while maintaining the simplicity and power of the Fleet scheduling framework.
 
-:::zone-end
-
-:::zone target="docs" pivot="namespace-scope"
-
-## Key differences between ResourcePlacement and ClusterResourcePlacement
+### Key differences between ResourcePlacement and ClusterResourcePlacement
 
 The following table highlights the key differences between `ResourcePlacement` and `ClusterResourcePlacement`:
 
@@ -1037,18 +1030,16 @@ The following table highlights the key differences between `ResourcePlacement` a
 
 Both `ResourcePlacement` and `ClusterResourcePlacement` share the same core capabilities for all other aspects not listed in the differences table.
 
-## Working with ClusterResourcePlacement
+### Working with ClusterResourcePlacement
 
 `ResourcePlacement` is designed to work in coordination with `ClusterResourcePlacement` (CRP) to provide a complete multi-cluster resource management solution. Understanding this relationship is crucial for effective fleet management.
-
-### Namespace prerequisites
 
 > [!IMPORTANT]
 > `ResourcePlacement` can only place namespace-scoped resources to clusters that already have the target namespace. We recommend using `ClusterResourcePlacement` for namespace establishment.
 
 **Typical workflow**:
 
-1. **Platform Admin**: Uses `ClusterResourcePlacement` to deploy namespaces across the fleet.
+1. **Platform Admins**: Use `ClusterResourcePlacement` to deploy namespaces across the fleet.
 2. **Application Teams**: Use `ResourcePlacement` to manage specific resources within those established namespaces.
 
 The following examples show how to coordinate CRP and RP:
@@ -1056,7 +1047,7 @@ The following examples show how to coordinate CRP and RP:
 > [!NOTE]
 > The following examples use the `placement.kubernetes-fleet.io/v1beta1` API version. The `selectionScope: NamespaceOnly` field is a preview feature available in v1beta1 and isn't available in the v1 API.
 
-**Platform Admin**: First, create the namespace using `ClusterResourcePlacement`:
+**Platform Admin**: Create the namespace using `ClusterResourcePlacement`:
 
 ```yaml
 apiVersion: placement.kubernetes-fleet.io/v1beta1
@@ -1074,7 +1065,7 @@ spec:
     placementType: PickAll # If placement type is not PickAll, the application teams needs to know what are the clusters they can place their applications.
 ```
 
-**Application Team**: Then, manage specific resources within the namespace using `ResourcePlacement`:
+**Application Team**: manage specific resources within the namespace using `ResourcePlacement`:
 
 ```yaml
 apiVersion: placement.kubernetes-fleet.io/v1beta1
@@ -1112,8 +1103,8 @@ This coordinated approach ensures that `ResourcePlacement` provides the flexibil
 
 `ResourcePlacement` uses the same placement patterns as `ClusterResourcePlacement`:
 
-- **[Placement types](./concepts-resource-placement.md#placement-policy)**: `PickAll`, `PickFixed`, and `PickN` strategies work identically for both APIs.
-- **[Rollout strategy](./concepts-rollout-strategy.md)**: Control how updates propagate across clusters with the same rolling update mechanisms.
+- **[Placement policy](#placement-policy)**: `PickAll`, `PickFixed`, and `PickN` policies work identically for both APIs.
+- **[Rollout strategy](#configuring-rollout-strategy)**: Control how updates propagate across clusters with the same rolling update mechanisms.
 - **[Status and observability](./howto-understand-placement.md)**: Monitor deployment progress using `kubectl describe resourceplacement <name> -n <namespace>`.
 - **[Advanced features](./concepts-resource-placement.md)**: Use tolerations, resource overrides, topology spread constraints, and affinity rules.
 
@@ -1130,14 +1121,13 @@ The key difference is in **resource selection** scope. While `ClusterResourcePla
 * [Defining a rollout strategy for a cluster resource placement](./concepts-rollout-strategy.md).
 * [Cluster resource placement FAQs](./faq.md#cluster-resource-placement-faqs).
 
-<!-- LINKS - external -->
-[fleet-github]: https://kubefleet.dev/docs/
-[kubefleet-props]: https://kubefleet.dev/docs/how-tos/property-based-scheduling/
+<!-- LINKS - internal -->
 [envelope-object]: ./quickstart-envelope-reserved-resources.md
-[crp-topo]: https://kubefleet.dev/docs/how-tos/topology-spread-constraints/
 [fleet-rollout]: ./concepts-rollout-strategy.md
-[fleet-staged-rollout]: ./concepts-rollout-strategy.md#staged-update-strategy-preview
 [fleet-tolerations]: ./use-taints-tolerations.md
-[fleet-snapshots]: ./concepts-placement-snapshots.md
 [fleet-status]: ./howto-understand-placement.md
+
+<!-- LINKS - external -->
+[kubefleet-props]: https://kubefleet.dev/docs/how-tos/property-based-scheduling/
+[crp-topo]: https://kubefleet.dev/docs/how-tos/topology-spread-constraints/
 [vm-sku-name]: /azure/virtual-machines/vm-naming-conventions
