@@ -988,8 +988,6 @@ The following scenarios can trigger placement changes:
 
 Updating the selected resources (i.e. modifying a `Deployment`) or updating the `resourceSelector` in a resource placement causes Fleet Manager to gradually roll out existing placements but **doesn't** trigger rescheduling (i.e. changing picked clusters) of the resource.
 
-:::zone-end
-
 ## Working with ResourcePlacement and ClusterResourcePlacement together
 
 While `ClusterResourcePlacement` assumes that namespaces represent application boundaries, real-world usage patterns are often more complex. Organizations frequently use namespaces as team boundaries rather than application boundaries, leading to several challenges that `ResourcePlacement` directly addresses:
