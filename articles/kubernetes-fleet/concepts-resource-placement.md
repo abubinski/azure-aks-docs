@@ -33,17 +33,15 @@ In this article we explore how you can use Fleet Manager's intelligent resource 
 
 Fleet Manager's resource placement capability is based on the [KubeFleet CNCF project](https://kubefleet.dev/).
 
-## High-level resource placement process
+## Resource placement process overview
 
-Use this process to use Fleet Manager's intelligent resource placement:
+Using Fleet Manager's intelligent resource placement involves these steps:
 
 1. **Stage resources on hub cluster**: use Continuous Deployment, GitOps or similar to apply the manifests for resource for distributions on the Fleet Manager hub cluster.
 1. **Create a resource placement**: create a placement manifest that selects the resource and defines a policy that is used to select which member clusters will receive the resource.
 1. **Apply resource placement on hub cluster**: take the placement manifest and apply to the hub cluster to initiate distribution of the resource.
 1. **Fleet Manager schedules resources**: Fleet Manager observes the resource placement and the selected scope and performs the distribution of the resources.
 1. **Observe distribution via resource placement**: query the resource placement on the hub cluster to observe the status of the resource as it rolls out.
-
-To update resources, you can either update the resource (i.e. a namespace) directly on the hub cluster, or modify the resource placement so it picks different member clusters.
 
 Fleet Manager has an Azure portal experience for resource placement that provides a more visual representation of the rollout.
 
