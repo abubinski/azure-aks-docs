@@ -980,7 +980,7 @@ The Fleet Manager scheduler prioritizes stability of existing resource placement
 
 The following scenarios can trigger placement changes:
 
-* Placement policy changes in the resource placemen (`ClusterResourcePlacement` or `ResourcePlacement`) can trigger removal and rescheduling of a resource.
+* Placement policy changes in the resource placement (`ClusterResourcePlacement` or `ResourcePlacement`) can trigger removal and rescheduling of a resource.
     * Scale out operations (increasing `numberOfClusters` with no other changes) places workloads only on new clusters and doesn't affect existing placements.
 * Member cluster changes, including:
     * A new member cluster becoming eligible and meets the placement policy, for example, a `PickAll` policy.
